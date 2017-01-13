@@ -1,2 +1,2 @@
 # clike_compiler
-Just an experiment...
+Another reinventing-the-wheel.
