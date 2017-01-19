@@ -17,17 +17,41 @@
  */
 package crux;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 /**
  *
  * @author davis
  */
 public class Compiler {
 
+        public static void run_lexical_test(String[] args) throws Exception {
+                String src = args[0];
+                Scanner s = null;
+
+                try {
+                        s = new Scanner(new BufferedReader(new FileReader(src)));
+                } catch (IOException e) {
+                        System.err.println("Error accessing the source file: \"" + src + "\"");
+                        System.exit(-2);
+                }
+
+                Token t = s.scan_next();
+                while (!t.is_eof()) {
+                        System.out.println(t);
+                        t = s.scan_next();
+                }
+                System.out.println(t);
+        }
+
         /**
          * @param args the command line arguments
+         * @throws java.lang.Exception
          */
-        public static void main(String[] args) {
-                // TODO code application logic here
+        public static void main(String[] args) throws Exception {
+                run_lexical_test(args);
         }
-        
+
 }

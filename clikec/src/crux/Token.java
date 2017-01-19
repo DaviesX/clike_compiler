@@ -18,9 +18,69 @@
 package crux;
 
 /**
- *
  * @author davis
  */
 public class Token {
-        
+
+        public enum Lexeme {
+                AND,
+                OR,
+                NOT,
+                LET,
+                VAR,
+                ARRAY,
+                FUNC,
+                IF,
+                ELSE,
+                WHILE,
+                TRUE,
+                FALSE,
+                RETURN,
+                OPEN_PAREN,
+                CLOSE_PAREN,
+                OPEN_BRACE,
+                CLOSE_BRACE,
+                OPEN_BRACKET,
+                CLOSE_BRACKET,
+                ADD,
+                SUB,
+                MUL,
+                DIV,
+                GREATER_EQUAL,
+                LESSER_EQUAL,
+                NOT_EQUAL,
+                EQUAL,
+                GREATER_THAN,
+                LESS_THAN,
+                ASSIGN,
+                COMMA,
+                SEMICOLON,
+                COLON,
+                CALL,
+                INTEGER,
+                FLOAT,
+                IDENTIFIER,
+                ERROR,
+                EOF,
+        };
+
+        private final FilePointer m_fp;
+        private final Lexeme m_type;
+        private final String m_attri;
+
+        public Token(Lexeme type, FilePointer fp, String attri) {
+                m_fp = fp;
+                m_type = type;
+                m_attri = attri;
+        }
+
+        boolean is_eof() {
+                return m_type == Lexeme.EOF;
+        }
+
+        @Override
+        public String toString() {
+                return m_type.toString()
+                       + (m_attri == null || m_attri.isEmpty() ? "" : "(" + m_attri + ")") + m_fp;
+        }
 }
