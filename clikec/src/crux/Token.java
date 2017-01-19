@@ -18,10 +18,15 @@
 package crux;
 
 /**
+ * A token storage class with lexeme type, attribute and file pointer.
+ * 
  * @author davis
  */
 public class Token {
 
+        /**
+         * All possible Lexeme specified by the language crux.
+         */
         public enum Lexeme {
                 AND,
                 OR,
@@ -68,14 +73,42 @@ public class Token {
         private final Lexeme m_type;
         private final String m_attri;
 
+        /**
+         * Token construction with lexeme type, file location and attribute.
+         * @param type lexeme type.
+         * @param fp file location.
+         * @param attri additional attribute (optional).
+         */
         public Token(Lexeme type, FilePointer fp, String attri) {
                 m_fp = fp;
                 m_type = type;
                 m_attri = attri;
         }
 
+        /**
+         * @return if the token is an EOF.
+         */
         boolean is_eof() {
                 return m_type == Lexeme.EOF;
+        }
+        
+        /**
+         * @return if the token is an error.
+         */
+        boolean is_err() {
+                return m_type == Lexeme.ERROR;
+        }
+        
+        Lexeme type() {
+                return m_type;
+        }
+        
+        String attribute() {
+                return m_attri;
+        }
+        
+        FilePointer file_pointer() {
+                return m_fp;
         }
 
         @Override

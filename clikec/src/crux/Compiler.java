@@ -22,7 +22,8 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /**
- *
+ * Main class.
+ * 
  * @author davis
  */
 public class Compiler {

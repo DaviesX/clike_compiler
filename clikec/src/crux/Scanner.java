@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Perform lexical analysis and generate token.
+ * 
  * @author davis
  */
 public class Scanner {
@@ -30,6 +32,10 @@ public class Scanner {
         private final FilePointer m_fp;
         private final Map<String, Token.Lexeme> m_keywords;
 
+        /**
+         * Construct a Scanner with the system file pointer specified as the first-line-first-column location.
+         * @param reader A system file pointer.
+         */
         public Scanner(BufferedReader reader) {
                 m_fp = new FilePointer(0, 0, reader);
 
@@ -247,6 +253,11 @@ public class Scanner {
                 }
         }
 
+        /**
+         * Scan next token.
+         * @return
+         * @throws IOException 
+         */
         public Token scan_next() throws IOException {
                 StringBuilder sb = new StringBuilder();
                 MatchResult res = match_next_everything(m_fp, m_keywords, sb);
