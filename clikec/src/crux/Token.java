@@ -19,7 +19,6 @@ package crux;
 
 /**
  * A token storage class with lexeme type, attribute and file pointer.
- * 
  * @author davis
  */
 public class Token {

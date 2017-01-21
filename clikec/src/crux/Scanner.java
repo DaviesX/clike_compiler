@@ -24,10 +24,10 @@ import java.util.Map;
 
 /**
  * Perform lexical analysis and generate token.
- * 
+ * Hand written scanner.
  * @author davis
  */
-public class Scanner {
+public class Scanner implements IScanner {
 
         private final FilePointer m_fp;
         private final Map<String, Token.Lexeme> m_keywords;
@@ -258,6 +258,7 @@ public class Scanner {
          * @return
          * @throws IOException 
          */
+        @Override
         public Token scan_next() throws IOException {
                 StringBuilder sb = new StringBuilder();
                 MatchResult res = match_next_everything(m_fp, m_keywords, sb);

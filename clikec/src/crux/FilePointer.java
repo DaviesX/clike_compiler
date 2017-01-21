@@ -22,7 +22,6 @@ import java.io.IOException;
 
 /**
  * A file pointer with line-column information.
- * 
  * @author davis
  */
 public class FilePointer {

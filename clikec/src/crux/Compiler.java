@@ -23,14 +23,13 @@ import java.io.IOException;
 
 /**
  * Main class.
- * 
  * @author davis
  */
 public class Compiler {
 
         public static void run_lexical_test(String[] args) throws Exception {
                 String src = args[0];
-                Scanner s = null;
+                IScanner s = null;
 
                 try {
                         s = new Scanner(new BufferedReader(new FileReader(src)));
@@ -46,13 +45,29 @@ public class Compiler {
                 }
                 System.out.println(t);
         }
+        
+        public static void run_syntactical_test(String[] args) throws Exception {
+                String src = args[0];
+                IScanner s = null;
+
+                try {
+                        s = new Scanner(new BufferedReader(new FileReader(src)));
+                } catch (IOException e) {
+                        System.err.println("Error accessing the source file: \"" + src + "\"");
+                        System.exit(-2);
+                }
+                
+                IParser p = new ParserRecursiveDescent(s);
+                System.out.println(p.toString());
+        }
 
         /**
          * @param args the command line arguments
          * @throws java.lang.Exception
          */
         public static void main(String[] args) throws Exception {
-                run_lexical_test(args);
+                //run_lexical_test(args);
+                run_syntactical_test(args);
         }
 
 }
