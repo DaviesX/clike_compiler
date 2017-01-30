@@ -22,6 +22,6 @@ package crux;
  * @author davis
  */
 public interface IParser {
-        @Override
-        String toString();
+        
+        AST parse(IScanner s);
 }

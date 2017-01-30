@@ -122,6 +122,21 @@ public class FilePointer {
                 m_i = m_mi;
                 m_j = m_mj;
         }
+        
+        @Override
+        public boolean equals(Object o) {
+                FilePointer other = (FilePointer) o;
+                return m_i == other.m_i &&
+                       m_j == other.m_j;
+        }
+
+        @Override
+        public int hashCode() {
+                int hash = 7;
+                hash = 23 * hash + this.m_i;
+                hash = 23 * hash + this.m_j;
+                return hash;
+        }
 
         @Override
         public String toString() {

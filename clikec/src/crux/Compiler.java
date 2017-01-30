@@ -57,8 +57,9 @@ public class Compiler {
                         System.exit(-2);
                 }
                 
-                IParser p = new ParserRecursiveDescent(s);
-                System.out.println(p.toString());
+                IParser p = new ParserRecursiveDescent();
+                AST ast = p.parse(s);
+                System.out.println(ast.toString());
         }
 
         /**

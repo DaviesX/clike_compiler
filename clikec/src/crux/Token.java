@@ -17,6 +17,8 @@
  */
 package crux;
 
+import java.util.Objects;
+
 /**
  * A token storage class with lexeme type, attribute and file pointer.
  * @author davis
@@ -108,6 +110,21 @@ public class Token {
         
         FilePointer file_pointer() {
                 return m_fp;
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+                Token other = (Token) o;
+                return m_type == other.m_type &&
+                       m_attri.equals(other.m_attri);
+        }
+
+        @Override
+        public int hashCode() {
+                int hash = 5;
+                hash = 11 * hash + Objects.hashCode(this.m_type);
+                hash = 11 * hash + Objects.hashCode(this.m_attri);
+                return hash;
         }
 
         @Override
