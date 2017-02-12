@@ -18,10 +18,12 @@
 package crux;
 
 /**
- * Perform syntactic analysis.
  * @author davis
  */
-public interface IParser {
+public class SymbolError extends Symbol {
         
-        AST parse(IScanner s) throws ErrorReport;
+        public SymbolError(String name) {
+                super(name);
+        }
+        
 }

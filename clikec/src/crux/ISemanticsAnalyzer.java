@@ -18,10 +18,8 @@
 package crux;
 
 /**
- * Perform syntactic analysis.
  * @author davis
  */
-public interface IParser {
-        
-        AST parse(IScanner s) throws ErrorReport;
+public interface ISemanticsAnalyzer {
+        AST analyze(AST ast) throws ErrorReport;
 }

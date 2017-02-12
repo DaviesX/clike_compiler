@@ -1,3 +1,5 @@
+package crux;
+
 /*
  * Copyright (C) 2017 davis
  *
@@ -15,13 +17,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package crux;
 
 /**
- * Perform syntactic analysis.
  * @author davis
  */
-public interface IParser {
-        
-        AST parse(IScanner s) throws ErrorReport;
+public class Symbol {
+
+        private final String name;
+
+        public Symbol(String name) {
+                this.name = name;
+        }
+
+        public String name() {
+                return this.name;
+        }
+
+        @Override
+        public String toString() {
+                return "Symbol(" + name + ")";
+        }
 }

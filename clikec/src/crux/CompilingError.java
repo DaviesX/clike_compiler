@@ -18,10 +18,11 @@
 package crux;
 
 /**
- * Perform syntactic analysis.
  * @author davis
  */
-public interface IParser {
+public class CompilingError extends RuntimeException {
         
-        AST parse(IScanner s) throws ErrorReport;
+        public CompilingError(String err) {
+                super(err);
+        }
 }

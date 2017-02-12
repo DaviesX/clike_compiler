@@ -61,6 +61,29 @@ public class Compiler {
                 AST ast = p.parse(s);
                 System.out.println(ast.toString());
         }
+        
+        public static void run_semantics_test(String[] args) throws Exception {
+                String src = args[0];
+                IScanner s = null;
+
+                try {
+                        s = new Scanner(new BufferedReader(new FileReader(src)));
+                } catch (IOException e) {
+                        System.err.println("Error accessing the source file: \"" + src + "\"");
+                        System.exit(-2);
+                }
+                
+                IParser p = new ParserRecursiveDescent();
+                AST ast = p.parse(s);
+                
+                ISemanticsAnalyzer sa = new SemanticsAnalyzer();
+                try {
+                        sa.analyze(ast);
+                } catch (ErrorReport err) {
+                        System.out.println(err.toString());
+                }
+                System.out.println("Crux program successfully parsed.");
+        }
 
         /**
          * @param args the command line arguments
@@ -68,7 +91,8 @@ public class Compiler {
          */
         public static void main(String[] args) throws Exception {
                 //run_lexical_test(args);
-                run_syntactical_test(args);
+                //run_syntactical_test(args);
+                run_semantics_test(args);
         }
 
 }

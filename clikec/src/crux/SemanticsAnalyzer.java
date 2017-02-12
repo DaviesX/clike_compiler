@@ -1,3 +1,5 @@
+package crux;
+
 /*
  * Copyright (C) 2017 davis
  *
@@ -15,13 +17,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package crux;
 
 /**
- * Perform syntactic analysis.
  * @author davis
  */
-public interface IParser {
+public class SemanticsAnalyzer implements ISemanticsAnalyzer {
+
+        @Override
+        public AST analyze(AST ast) throws ErrorReport {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
         
-        AST parse(IScanner s) throws ErrorReport;
 }
