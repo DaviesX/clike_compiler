@@ -79,10 +79,11 @@ public class Compiler {
                 ISemanticsAnalyzer sa = new SemanticsAnalyzer();
                 try {
                         sa.analyze(ast);
+                        System.out.println("Crux program successfully parsed.");
                 } catch (ErrorReport err) {
+                        System.out.println("Error parsing file.");
                         System.out.println(err.toString());
                 }
-                System.out.println("Crux program successfully parsed.");
         }
 
         /**

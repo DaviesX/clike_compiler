@@ -1,5 +1,3 @@
-package crux;
-
 /*
  * Copyright (C) 2017 davis
  *
@@ -17,33 +15,15 @@ package crux;
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+package crux;
 
 /**
  * @author davis
  */
-public class Symbol {
-
-        private final String name;
-        private int m_depth;
-
-        public Symbol(String name) {
-                this.name = name;
-        }
+public class DeclareSymbolError extends CompilingError {
         
-        public void set_depth(int depth) {
-                m_depth = depth;
-        }
-        
-        public int get_depth() {
-                return m_depth;
-        }
-
-        public String name() {
-                return this.name;
-        }
-
-        @Override
-        public String toString() {
-                return "Symbol(" + name + ")";
+        public DeclareSymbolError(Token t) {
+                super("DeclareSymbolError(" + (t.file_pointer().line_no() + 1) + "," + t.file_pointer().column() 
+                        + ")[" + t.attribute() + " already exists.]");
         }
 }

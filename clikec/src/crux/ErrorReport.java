@@ -27,6 +27,10 @@ public class ErrorReport extends RuntimeException {
         
         private final List<CompilingError>      m_errors;
         
+        public ErrorReport() {
+                m_errors = new ArrayList<>();
+        }
+        
         public ErrorReport(CompilingError err) {
                 m_errors = new ArrayList<>();
                 m_errors.add(err);
@@ -44,12 +48,17 @@ public class ErrorReport extends RuntimeException {
                 return m_errors;
         }
         
+        public boolean is_empty() {
+                return m_errors.isEmpty();
+        }
+        
         @Override
         public String toString() {
                 StringBuilder s = new StringBuilder();
                 m_errors.forEach((err) -> {
                         s.append(err.toString()).append('\n');
                 });
+                s.setLength(s.length() - 1);
                 return s.toString();
         }
 }

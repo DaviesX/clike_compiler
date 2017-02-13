@@ -22,7 +22,14 @@ package crux;
  */
 public class CompilingError extends RuntimeException {
         
+        private final String m_error;
         public CompilingError(String err) {
                 super(err);
+                m_error = err;
+        }
+        
+        @Override
+        public String toString() {
+                return m_error;
         }
 }

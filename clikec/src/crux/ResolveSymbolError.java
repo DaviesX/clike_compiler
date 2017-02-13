@@ -20,10 +20,11 @@ package crux;
 /**
  * @author davis
  */
-public class SymbolError extends Symbol {
+public class ResolveSymbolError extends CompilingError {
         
-        public SymbolError(String name) {
-                super(name);
+        public ResolveSymbolError(Token t) {
+                super("ResolveSymbolError(" + (t.file_pointer().line_no() + 1) + "," + t.file_pointer().column() 
+                        + ")[Could not find " + t.attribute() + ".]");
         }
         
 }
