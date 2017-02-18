@@ -89,10 +89,6 @@ public class ParseTree {
                 return m_root;
         }
         
-        public Node simplify() {
-                throw new UnsupportedOperationException("Not supported yet.");
-        }
-        
         private int             m_d = 0;
         private StringBuilder   m_print_buffer = new StringBuilder();
 

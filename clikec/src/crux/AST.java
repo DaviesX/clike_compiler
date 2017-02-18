@@ -20,6 +20,6 @@ package crux;
 /**
  * @author davis
  */
-public interface ISemanticsAnalyzer {
-        AST analyze(ParseTree ast) throws ErrorReport;
+public class AST {
+        
 }

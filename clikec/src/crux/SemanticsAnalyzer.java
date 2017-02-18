@@ -111,11 +111,12 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
         }
 
         @Override
-        public ParseTree analyze(ParseTree ast) throws ErrorReport {
-                check(ast.get_root());
+        public AST analyze(ParseTree pare_tree) throws ErrorReport {
+                check(pare_tree.get_root());
                 if (!m_errs.is_empty()) {
                         throw m_errs;
                 }
+                AST ast = new AST();
                 return ast;
         }
 

@@ -591,8 +591,8 @@ public class ParserRecursiveDescent implements IParser {
         }
 
         // program := declaration-list EOF .
-        private void program(ParseTree ast) throws IOException {
-                ParseTree.Node root = ast.create_root(new NonTerminal(NonTerminal.Type.PROGRAM));
+        private void program(ParseTree parse_tree) throws IOException {
+                ParseTree.Node root = parse_tree.create_root(new NonTerminal(NonTerminal.Type.PROGRAM));
                 declaration_list(root.add_child(0, new NonTerminal(NonTerminal.Type.DECLARATION_LIST)));
         }
 
