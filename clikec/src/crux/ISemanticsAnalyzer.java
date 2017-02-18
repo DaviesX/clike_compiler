@@ -21,5 +21,5 @@ package crux;
  * @author davis
  */
 public interface ISemanticsAnalyzer {
-        AST analyze(AST ast) throws ErrorReport;
+        ParseTree analyze(ParseTree ast) throws ErrorReport;
 }

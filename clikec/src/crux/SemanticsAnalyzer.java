@@ -26,9 +26,8 @@ import java.util.Set;
  */
 public class SemanticsAnalyzer implements ISemanticsAnalyzer {
 
-        private SymbolTable m_table = new SymbolTable();
+        private final SymbolTable m_table = new SymbolTable();
         private final ErrorReport m_errs = new ErrorReport();
-        private final Set<String> m_reserved;
 
         public SemanticsAnalyzer() {
                 // Preload symbols.
@@ -38,20 +37,6 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                 m_table.put("printInt", new Symbol("printInt"));
                 m_table.put("printFloat", new Symbol("printFloat"));
                 m_table.put("println", new Symbol("println"));
-
-                m_reserved = new HashSet<>();
-                m_reserved.add("void");
-                m_reserved.add("bool");
-                m_reserved.add("int");
-                m_reserved.add("float");
-        }
-
-        private void enter_scope() {
-                m_table = m_table.enter_scope();
-        }
-
-        private void leave_scope() {
-                m_table = m_table.leave_scope();
         }
 
         private void log_current_symbols() {
@@ -80,7 +65,7 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                 }
         }
 
-        private void check(AST.Node node) throws ErrorReport {
+        private void check(ParseTree.Node node) throws ErrorReport {
                 if (node == null) {
                         return;
                 }
@@ -90,14 +75,14 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                         switch (nt.type()) {
                                 case STATEMENT_BLOCK:
                                         if (!m_table.is_function_scope()) {
-                                                enter_scope();
+                                                m_table.enter_scope();
                                         } else {
                                                 m_table.unset_function_scope();
                                         }
                                         break;
                                 case FUNCTION_DEFINITION:
                                         declare_symbol(node.get_child(1).terminal());
-                                        enter_scope();
+                                        m_table.enter_scope();
                                         m_table.set_function_scope();
                                         break;
                                 case VARIABLE_DECLARATION:
@@ -119,14 +104,14 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                         }
                         switch (nt.type()) {
                                 case STATEMENT_BLOCK:
-                                        leave_scope();
+                                        m_table.leave_scope();
                                         break;
                         }
                 }
         }
 
         @Override
-        public AST analyze(AST ast) throws ErrorReport {
+        public ParseTree analyze(ParseTree ast) throws ErrorReport {
                 check(ast.get_root());
                 if (!m_errs.is_empty()) {
                         throw m_errs;

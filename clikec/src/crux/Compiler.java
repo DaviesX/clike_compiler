@@ -58,7 +58,7 @@ public class Compiler {
                 }
                 
                 IParser p = new ParserRecursiveDescent();
-                AST ast = p.parse(s);
+                ParseTree ast = p.parse(s);
                 System.out.println(ast.toString());
         }
         
@@ -74,7 +74,7 @@ public class Compiler {
                 }
                 
                 IParser p = new ParserRecursiveDescent();
-                AST ast = p.parse(s);
+                ParseTree ast = p.parse(s);
                 
                 ISemanticsAnalyzer sa = new SemanticsAnalyzer();
                 try {

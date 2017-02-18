@@ -24,7 +24,7 @@ import java.util.Map;
  * Abstract syntax tree.
  * @author davis
  */
-public class AST {
+public class ParseTree {
         
         public class Node {
                 private final Node                      m_parent;
