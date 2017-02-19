@@ -26,7 +26,7 @@ import java.util.Set;
  */
 public class SemanticsAnalyzer implements ISemanticsAnalyzer {
 
-        private final SymbolTable m_table = new SymbolTable();
+        private SymbolTable m_table = new SymbolTable();
         private final ErrorReport m_errs = new ErrorReport();
 
         public SemanticsAnalyzer() {
@@ -75,14 +75,14 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                         switch (nt.type()) {
                                 case STATEMENT_BLOCK:
                                         if (!m_table.is_function_scope()) {
-                                                m_table.enter_scope();
+                                                m_table = m_table.enter_scope();
                                         } else {
                                                 m_table.unset_function_scope();
                                         }
                                         break;
                                 case FUNCTION_DEFINITION:
                                         declare_symbol((Token) node.get_child(1).element());
-                                        m_table.enter_scope();
+                                        m_table = m_table.enter_scope();
                                         m_table.set_function_scope();
                                         break;
                                 case VARIABLE_DECLARATION:
@@ -104,7 +104,7 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                         }
                         switch (nt.type()) {
                                 case STATEMENT_BLOCK:
-                                        m_table.leave_scope();
+                                        m_table = m_table.leave_scope();
                                         break;
                         }
                 }

@@ -92,8 +92,8 @@ public class Compiler {
          */
         public static void main(String[] args) throws Exception {
                 //run_lexical_test(args);
-                run_syntactical_test(args);
-                //run_semantics_test(args);
+                //run_syntactical_test(args);
+                run_semantics_test(args);
         }
 
 }
