@@ -17,111 +17,46 @@
  */
 package crux;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Abstract syntax tree.
  * @author davis
  */
 public class ParseTree {
-        
-        public class Node {
-                private final Node                      m_parent;
-                private final NonTerminal               m_nt;
-                private final Token                     m_t;
-                private final Map<Integer, Node>        m_children = new HashMap<>();
-                
-                public Node(Node parent, NonTerminal nt) {
-                        m_parent = parent;
-                        m_nt = nt;
-                        m_t = null;
-                }
-                
-                public Node(Node parent, Token t) {
-                        m_parent = parent;
-                        m_nt = null;
-                        m_t = t;
-                }
-                
-                public NonTerminal nonterminal() {
-                        return m_nt;
-                }
-                
-                public Token terminal() {
-                        return m_t;
-                }
-                
-                public Node get_parent(Node node) {
-                        return m_parent;
-                }
-                
-                public Node add_child(int id, NonTerminal nt) {
-                        Node node = new Node(this, nt);
-                        m_children.put(id, node);
-                        return node;
-                }
-                
-                public Node add_child(int id, Token t) {
-                        Node node = new Node(this, t);
-                        m_children.put(id, node);
-                        return node;
-                }
-                
-                public Node get_child(int id) {
-                        return m_children.get(id);
-                }
-                
-                public int children_size() {
-                        return m_children.size();
-                }
-        }
-        
-        private Node    m_root = null;
-        
-        
-        public Node create_root(NonTerminal nt) {
-                m_root = new Node(null, nt);
-                return m_root;
-        }
-        
-        public Node get_root() {
-                return m_root;
-        }
-        
-        private int             m_d = 0;
-        private StringBuilder   m_print_buffer = new StringBuilder();
 
-        private void enter_node(NonTerminal nonterminal) {
+        private GeneralNode m_root;
+
+        public GeneralNode create_root(NonTerminal nt) {
+                m_root = new GeneralNode(null, nt);
+                return m_root;
+        }
+        
+        public GeneralNode get_root() {
+                return m_root;
+        }
+        
+        private void print_node(NonTerminal nonterminal, int depth, StringBuilder pb) {
 
                 String node_data = new String();
-                for (int i = 0; i < m_d; i++) {
+                for (int i = 0; i < depth; i++) {
                         node_data += "  ";
                 }
                 node_data += nonterminal.toString();
-                m_print_buffer.append(node_data).append("\n");
-                m_d ++;
+                pb.append(node_data).append("\n");
         }
 
-        private void exit_node(NonTerminal nonterminal) {
-                m_d --;
-        }
-        
-        private void to_string(Node node) {
+        private void to_string(GeneralNode node, int depth, StringBuilder pb) {
                 if (node == null || 
-                    node.nonterminal() == null)
+                    !node.element().is(SyntacticElement.Type.NonTerminal))
                         return;
-                enter_node(node.nonterminal());
+                print_node((NonTerminal) node.element(), depth, pb);
                 for (int i = 0; i < node.children_size(); i ++) {
-                        to_string(node.get_child(i));
+                        to_string((GeneralNode) node.get_child(i), depth + 1, pb);
                 }
-                exit_node(node.nonterminal());
         }
         
         @Override
         public String toString() {
-                m_print_buffer.setLength(0);
-                to_string(m_root);
-                return m_print_buffer.toString();
+                StringBuilder pb = new StringBuilder();
+                to_string(m_root, 0, pb);
+                return pb.toString();
         }
 }

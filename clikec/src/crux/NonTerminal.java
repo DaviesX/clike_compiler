@@ -20,7 +20,7 @@ package crux;
 /**
  * @author davis
  */
-public class NonTerminal {
+public class NonTerminal extends SyntacticElement {
 
         public enum Type {
                 DESIGNATOR,
@@ -56,6 +56,7 @@ public class NonTerminal {
         private final Type m_type;
         
         public NonTerminal(Type type) {
+                super(SyntacticElement.Type.NonTerminal);
                 m_type = type;
         }
         

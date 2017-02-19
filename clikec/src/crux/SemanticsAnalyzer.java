@@ -65,13 +65,13 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                 }
         }
 
-        private void check(ParseTree.Node node) throws ErrorReport {
+        private void check(GeneralNode node) throws ErrorReport {
                 if (node == null) {
                         return;
                 }
-
-                NonTerminal nt = node.nonterminal();
-                if (nt != null) {
+                
+                if (node.element().is(SyntacticElement.Type.NonTerminal)) {
+                        NonTerminal nt = (NonTerminal) node.element();
                         switch (nt.type()) {
                                 case STATEMENT_BLOCK:
                                         if (!m_table.is_function_scope()) {
@@ -81,22 +81,22 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                                         }
                                         break;
                                 case FUNCTION_DEFINITION:
-                                        declare_symbol(node.get_child(1).terminal());
+                                        declare_symbol((Token) node.get_child(1).element());
                                         m_table.enter_scope();
                                         m_table.set_function_scope();
                                         break;
                                 case VARIABLE_DECLARATION:
                                 case ARRAY_DECLARATION:
-                                        declare_symbol(node.get_child(1).terminal());
+                                        declare_symbol((Token) node.get_child(1).element());
                                         break;
                                 case PARAMETER:
-                                        declare_symbol(node.get_child(0).terminal());
+                                        declare_symbol((Token) node.get_child(0).element());
                                         break;
                                 case CALL_EXPRESSION:
-                                        resolve_symbol(node.get_child(1).terminal());
+                                        resolve_symbol((Token) node.get_child(1).element());
                                         break;
                                 case DESIGNATOR:
-                                        resolve_symbol(node.get_child(0).terminal());
+                                        resolve_symbol((Token) node.get_child(0).element());
                                         break;
                         }
                         for (int i = 0; i < node.children_size(); i++) {
@@ -111,8 +111,8 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
         }
 
         @Override
-        public AST analyze(ParseTree pare_tree) throws ErrorReport {
-                check(pare_tree.get_root());
+        public AST analyze(ParseTree tree) throws ErrorReport {
+                check(tree.get_root());
                 if (!m_errs.is_empty()) {
                         throw m_errs;
                 }

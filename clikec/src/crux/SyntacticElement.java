@@ -20,6 +20,25 @@ package crux;
 /**
  * @author davis
  */
-public interface ISemanticsAnalyzer {
-        AST analyze(ParseTree tree) throws ErrorReport;
+public class SyntacticElement {
+        
+        public enum Type {
+                Terminal,
+                NonTerminal,
+                Abstract
+        }
+        
+        private final Type m_type;
+        
+        public SyntacticElement(Type type) {
+                m_type = type;
+        }
+        
+        public Type element_type() {
+                return m_type;
+        }
+        
+        public boolean is(Type t) {
+                return m_type == t;
+        }
 }

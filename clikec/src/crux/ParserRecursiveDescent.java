@@ -103,7 +103,7 @@ public class ParserRecursiveDescent implements IParser {
         }
 
         // literal := INTEGER | FLOAT | TRUE | FALSE .
-        private void literal(ParseTree.Node node) throws IOException {
+        private void literal(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(NonTerminal.Type.LITERAL, new HashSet() {{
                         add(Token.Lexeme.INTEGER);
@@ -114,7 +114,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // op0 := ">=" | "<=" | "!=" | "==" | ">" | "<" 
-        private void op0(ParseTree.Node node) throws IOException {
+        private void op0(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(NonTerminal.Type.OP0, new HashSet() {{
                         add(Token.Lexeme.GREATER_EQUAL);
@@ -127,7 +127,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // op1 := "+" | "-" | "or" .
-        private void op1(ParseTree.Node node) throws IOException {
+        private void op1(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(NonTerminal.Type.OP1, new HashSet() {{
                         add(Token.Lexeme.ADD);
@@ -137,7 +137,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // op2 := "*" | "/" | "and" .
-        private void op2(ParseTree.Node node) throws IOException {
+        private void op2(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(NonTerminal.Type.OP1, new HashSet() {{
                         add(Token.Lexeme.MUL);
@@ -147,7 +147,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // expression0 := expression1 [ op0 expression1 ] .
-        private void expression0(ParseTree.Node node) throws IOException {
+        private void expression0(GeneralNode node) throws IOException {
                 expression1(node.add_child(0, new NonTerminal(NonTerminal.Type.EXPRESSION1)));
                 
                 if (have(new HashSet() {{
@@ -164,7 +164,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // expression1 := expression2 { op1 expression2 } .
-        private void expression1(ParseTree.Node node) throws IOException {
+        private void expression1(GeneralNode node) throws IOException {
                 expression2(node.add_child(0, new NonTerminal(NonTerminal.Type.EXPRESSION2)));
                 
                 int i_child = 1;
@@ -180,7 +180,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // expression2 := expression3 { op2 expression3 } .
-        private void expression2(ParseTree.Node node) throws IOException {
+        private void expression2(GeneralNode node) throws IOException {
                 expression3(node.add_child(0, new NonTerminal(NonTerminal.Type.EXPRESSION3)));
                 
                 int i_child = 1;
@@ -200,7 +200,7 @@ public class ParserRecursiveDescent implements IParser {
         //      | designator
         //      | call-expression
         //      | literal .
-        private void expression3(ParseTree.Node node) throws IOException {
+        private void expression3(GeneralNode node) throws IOException {
                 switch (m_curr_tok.type()) {
                         case NOT:
                                 node.add_child(0, m_curr_tok);
@@ -245,7 +245,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // expression-list := [ expression0 { "," expression0 } ] .
-        private void expression_list(ParseTree.Node node) throws IOException {
+        private void expression_list(GeneralNode node) throws IOException {
                 if (have(new HashSet<Token.Lexeme>() {{
                         add(Token.Lexeme.INTEGER);
                         add(Token.Lexeme.FLOAT);
@@ -270,7 +270,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // call-expression := "::" IDENTIFIER "(" expression-list ")" .
-        private void call_expression(ParseTree.Node node) throws IOException {
+        private void call_expression(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.CALL);
                 
@@ -288,7 +288,7 @@ public class ParserRecursiveDescent implements IParser {
 
 
         // designator := IDENTIFIER { "[" expression0 "]" } .
-        private void designator(ParseTree.Node node) throws IOException {
+        private void designator(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.IDENTIFIER);
                 
@@ -307,13 +307,13 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // type := IDENTIFIER .
-        private void type(ParseTree.Node node) throws IOException {
+        private void type(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.IDENTIFIER);
         }
         
         // variable-declaration := "var" IDENTIFIER ":" type ";" .
-        private void variable_declaration(ParseTree.Node node) throws IOException {
+        private void variable_declaration(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.VAR);
                 
@@ -330,7 +330,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // array-declaration := "array" IDENTIFIER ":" type "[" INTEGER "]" { "[" INTEGER "]" } ";" .
-        private void array_declaration(ParseTree.Node node) throws IOException {
+        private void array_declaration(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.ARRAY);
                 
@@ -362,7 +362,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // parameter := IDENTIFIER ":" type .
-        private void parameter(ParseTree.Node node) throws IOException {
+        private void parameter(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.IDENTIFIER);
                 
@@ -373,7 +373,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // parameter-list := [ parameter { "," parameter } ] .
-        private void parameter_list(ParseTree.Node node) throws IOException {
+        private void parameter_list(GeneralNode node) throws IOException {
                 if (have(Token.Lexeme.IDENTIFIER)) {
                         parameter(node.add_child(0, new NonTerminal(NonTerminal.Type.PARAMETER)));
                         int i_child = 1;
@@ -388,7 +388,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // assignment-statement := "let" designator "=" expression0 ";" .
-        private void assignment_statement(ParseTree.Node node) throws IOException {
+        private void assignment_statement(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.LET);
                 
@@ -404,14 +404,14 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // call-statement := call-expression ";" .
-        private void call_statement(ParseTree.Node node) throws IOException {
+        private void call_statement(GeneralNode node) throws IOException {
                 call_expression(node.add_child(0, new NonTerminal(NonTerminal.Type.CALL_EXPRESSION)));
                 node.add_child(1, m_curr_tok);
                 expect(Token.Lexeme.SEMICOLON);
         }
         
         // if-statement := "if" expression0 statement-block [ "else" statement-block ] .
-        private void if_statement(ParseTree.Node node) throws IOException {
+        private void if_statement(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.IF);
                 
@@ -427,7 +427,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // while-statement := "while" expression0 statement-block .
-        private void while_statement(ParseTree.Node node) throws IOException {
+        private void while_statement(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.WHILE);
                 
@@ -436,7 +436,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // return-statement := "return" expression0 ";" .
-        private void return_statement(ParseTree.Node node) throws IOException {
+        private void return_statement(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.RETURN);
                 
@@ -452,7 +452,7 @@ public class ParserRecursiveDescent implements IParser {
         //      | if-statement
         //      | while-statement
         //      | return-statement .
-        private void statement(ParseTree.Node node) throws IOException {
+        private void statement(GeneralNode node) throws IOException {
                 switch (m_curr_tok.type()) {
                         case VAR:
                                 variable_declaration(node.add_child(0, new NonTerminal(
@@ -492,7 +492,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // statement-list := { statement } .
-        private void statement_list(ParseTree.Node node) throws IOException {
+        private void statement_list(GeneralNode node) throws IOException {
                 int i_child = 0;
                 while (have(new HashSet<Token.Lexeme>() {{
                         add(Token.Lexeme.VAR);
@@ -508,7 +508,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // statement-block := "{" statement-list "}" .
-        private void statement_block(ParseTree.Node node) throws IOException {
+        private void statement_block(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.OPEN_BRACE);
                 if (have(new HashSet<Token.Lexeme>() {{
@@ -529,7 +529,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // function-definition := "func" IDENTIFIER "(" parameter-list ")" ":" type statement-block .
-        private void function_definition(ParseTree.Node node) throws IOException {
+        private void function_definition(GeneralNode node) throws IOException {
                 node.add_child(0, m_curr_tok);
                 expect(Token.Lexeme.FUNC);
                 
@@ -553,7 +553,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // declaration := variable-declaration | array-declaration | function-definition .
-        private void declaration(ParseTree.Node node) throws IOException {                
+        private void declaration(GeneralNode node) throws IOException {                
                 switch (m_curr_tok.type()) {
                         case VAR:
                                 variable_declaration(node.add_child(0, new NonTerminal(
@@ -578,7 +578,7 @@ public class ParserRecursiveDescent implements IParser {
         }
         
         // declaration-list := { declaration } .
-        private void declaration_list(ParseTree.Node node) throws IOException {
+        private void declaration_list(GeneralNode node) throws IOException {
                 int i_child = 0;
                 while (have(new HashSet<Token.Lexeme>() {{
                         add(Token.Lexeme.VAR);
@@ -591,22 +591,22 @@ public class ParserRecursiveDescent implements IParser {
         }
 
         // program := declaration-list EOF .
-        private void program(ParseTree parse_tree) throws IOException {
-                ParseTree.Node root = parse_tree.create_root(new NonTerminal(NonTerminal.Type.PROGRAM));
+        private void program(ParseTree tree) throws IOException {
+                GeneralNode root = tree.create_root(new NonTerminal(NonTerminal.Type.PROGRAM));
                 declaration_list(root.add_child(0, new NonTerminal(NonTerminal.Type.DECLARATION_LIST)));
         }
 
         @Override
         public ParseTree parse(IScanner s) {
-                ParseTree ast = new ParseTree();
+                ParseTree tree = new ParseTree();
                 try {
                         m_err_buf = new StringBuilder();
                         m_scanner = s;
                         m_curr_tok = s.scan_next();
-                        program(ast);
+                        program(tree);
                 } catch (IOException ex) {
                         Logger.getLogger(ParserRecursiveDescent.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                return ast;
+                return tree;
         }
 }

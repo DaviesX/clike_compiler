@@ -23,7 +23,7 @@ import java.util.Objects;
  * A token storage class with lexeme type, attribute and file pointer.
  * @author davis
  */
-public class Token {
+public class Token extends SyntacticElement {
 
         /**
          * All possible Lexeme specified by the language crux.
@@ -81,6 +81,7 @@ public class Token {
          * @param attri additional attribute (optional).
          */
         public Token(Lexeme type, FilePointer fp, String attri) {
+                super(SyntacticElement.Type.Terminal);
                 m_fp = fp;
                 m_type = type;
                 m_attri = attri;

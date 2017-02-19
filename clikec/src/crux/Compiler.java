@@ -58,8 +58,8 @@ public class Compiler {
                 }
                 
                 IParser p = new ParserRecursiveDescent();
-                ParseTree ast = p.parse(s);
-                System.out.println(ast.toString());
+                ParseTree tree = p.parse(s);
+                System.out.println(tree.toString());
         }
         
         public static void run_semantics_test(String[] args) throws Exception {
@@ -74,11 +74,11 @@ public class Compiler {
                 }
                 
                 IParser p = new ParserRecursiveDescent();
-                ParseTree ast = p.parse(s);
+                ParseTree tree = p.parse(s);
                 
                 ISemanticsAnalyzer sa = new SemanticsAnalyzer();
                 try {
-                        sa.analyze(ast);
+                        sa.analyze(tree);
                         System.out.println("Crux program successfully parsed.");
                 } catch (ErrorReport err) {
                         System.out.println("Error parsing file.");
@@ -92,8 +92,8 @@ public class Compiler {
          */
         public static void main(String[] args) throws Exception {
                 //run_lexical_test(args);
-                //run_syntactical_test(args);
-                run_semantics_test(args);
+                run_syntactical_test(args);
+                //run_semantics_test(args);
         }
 
 }
