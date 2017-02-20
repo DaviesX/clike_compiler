@@ -85,6 +85,25 @@ public class Compiler {
                         System.out.println(err.toString());
                 }
         }
+        
+        public static void run_semantics_ast_test(String[] args) throws Exception {
+                String src = args[0];
+                IScanner s = null;
+
+                try {
+                        s = new Scanner(new BufferedReader(new FileReader(src)));
+                } catch (IOException e) {
+                        System.err.println("Error accessing the source file: \"" + src + "\"");
+                        System.exit(-2);
+                }
+                
+                IParser p = new ParserRecursiveDescent();
+                ParseTree tree = p.parse(s);
+                
+                ISemanticsAnalyzer sa = new SemanticsAnalyzer();
+                AST ast = sa.analyze(tree);
+                System.out.println(ast.toString());
+        }
 
         /**
          * @param args the command line arguments
@@ -93,7 +112,8 @@ public class Compiler {
         public static void main(String[] args) throws Exception {
                 //run_lexical_test(args);
                 //run_syntactical_test(args);
-                run_semantics_test(args);
+                //run_semantics_test(args);
+                run_semantics_ast_test(args);
         }
 
 }

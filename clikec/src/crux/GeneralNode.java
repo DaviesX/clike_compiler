@@ -26,8 +26,8 @@ import java.util.Map;
 public class GeneralNode {
 
         protected final GeneralNode m_parent;
-        protected final SyntacticElement m_element;
-        protected final Map<Integer, GeneralNode> m_children = new HashMap<>();
+        protected SyntacticElement m_element;
+        protected Map<Integer, GeneralNode> m_children = new HashMap<>();
 
         public GeneralNode(GeneralNode parent, SyntacticElement elm) {
                 m_parent = parent;
@@ -54,5 +54,52 @@ public class GeneralNode {
 
         public int children_size() {
                 return m_children.size();
+        }
+        
+        private void simplify(GeneralNode node) {
+                switch (node.children_size()) {
+                        case 0:
+                                // Do nothing.
+                                break;
+                        case 1:
+                                GeneralNode down = skip(node);
+                                node.m_element = down.m_element;
+                                node.m_children = down.m_children;
+                                simplify(node);
+                                break;
+                        default:
+                                for (int i = 0; i < node.children_size(); i ++) {
+                                        simplify(node.get_child(i));
+                                }
+                                break;
+                }
+        }
+        
+        public void simplify() {
+                simplify(this);
+        }
+        
+        private GeneralNode skip(GeneralNode node) {
+                if (node.children_size() == 1) {
+                        return skip(node.get_child(0));
+                } else {
+                        return node;
+                }
+        }
+        
+        public GeneralNode skip() {
+                return skip(this);
+        }
+        
+        private GeneralNode bottom_left(GeneralNode node) {
+                if (node.children_size() == 0) {
+                        return node;
+                } else {
+                        return skip(node.get_child(0));
+                }
+        }
+        
+        public GeneralNode bottom_left() {
+                return skip(this);
         }
 }

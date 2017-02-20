@@ -26,6 +26,9 @@ import java.util.List;
 public class AbstractMetaData extends SyntacticElement {
         
         public enum Type {
+                DeclarationList,
+                StatementList,
+                ExpressionList,
                 ArrayDeclaration,
                 VariableDeclaration,
                 FunctionDefinition,

@@ -33,6 +33,10 @@ public class ParseTree {
                 return m_root;
         }
         
+        public void simplify() {
+                m_root.simplify();
+        }
+        
         private void print_node(NonTerminal nonterminal, int depth, StringBuilder pb) {
 
                 String node_data = new String();
@@ -42,12 +46,25 @@ public class ParseTree {
                 node_data += nonterminal.toString();
                 pb.append(node_data).append("\n");
         }
+        
+        private void print_node(Token terminal, int depth, StringBuilder pb) {
+
+                String node_data = new String();
+                for (int i = 0; i < depth; i++) {
+                        node_data += "  ";
+                }
+                node_data += terminal.toString();
+                pb.append(node_data).append("\n");
+        }
 
         private void to_string(GeneralNode node, int depth, StringBuilder pb) {
-                if (node == null || 
-                    !node.element().is(SyntacticElement.Type.NonTerminal))
+                if (node == null)
                         return;
-                print_node((NonTerminal) node.element(), depth, pb);
+                if (node.element().is(SyntacticElement.Type.Terminal)) {
+                        print_node((Token) node.element(), depth, pb);
+                } else {
+                        print_node((NonTerminal) node.element(), depth, pb);
+                }
                 for (int i = 0; i < node.children_size(); i ++) {
                         to_string((GeneralNode) node.get_child(i), depth + 1, pb);
                 }

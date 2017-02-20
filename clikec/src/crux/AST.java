@@ -22,7 +22,7 @@ package crux;
  */
 public class AST {
         
-        private GeneralNode m_root;
+        private GeneralNode m_root = null;
 
         public GeneralNode create_root(AbstractMetaData nt) {
                 m_root = new GeneralNode(null, nt);
@@ -34,7 +34,6 @@ public class AST {
         }
         
         private void print_node(AbstractMetaData meta, int depth, StringBuilder pb) {
-
                 String node_data = new String();
                 for (int i = 0; i < depth; i++) {
                         node_data += "  ";
@@ -44,6 +43,9 @@ public class AST {
         }
 
         private void to_string(GeneralNode node, int depth, StringBuilder pb) {
+                if (node == null)
+                        return;
+                
                 print_node((AbstractMetaData) node.element(), depth, pb);
                 for (int i = 0; i < node.children_size(); i ++) {
                         to_string((GeneralNode) node.get_child(i), depth + 1, pb);
