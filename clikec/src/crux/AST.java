@@ -22,4 +22,38 @@ package crux;
  */
 public class AST {
         
+        private GeneralNode m_root;
+
+        public GeneralNode create_root(AbstractMetaData nt) {
+                m_root = new GeneralNode(null, nt);
+                return m_root;
+        }
+        
+        public GeneralNode get_root() {
+                return m_root;
+        }
+        
+        private void print_node(AbstractMetaData meta, int depth, StringBuilder pb) {
+
+                String node_data = new String();
+                for (int i = 0; i < depth; i++) {
+                        node_data += "  ";
+                }
+                node_data += meta.toString();
+                pb.append(node_data).append("\n");
+        }
+
+        private void to_string(GeneralNode node, int depth, StringBuilder pb) {
+                print_node((AbstractMetaData) node.element(), depth, pb);
+                for (int i = 0; i < node.children_size(); i ++) {
+                        to_string((GeneralNode) node.get_child(i), depth + 1, pb);
+                }
+        }
+        
+        @Override
+        public String toString() {
+                StringBuilder pb = new StringBuilder();
+                to_string(m_root, 0, pb);
+                return pb.toString();
+        }
 }
