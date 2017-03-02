@@ -28,6 +28,7 @@ public class GeneralNode {
         protected final GeneralNode m_parent;
         protected SyntacticElement m_element;
         protected Map<Integer, GeneralNode> m_children = new HashMap<>();
+        protected int m_max_id = -1;
 
         public GeneralNode(GeneralNode parent, SyntacticElement elm) {
                 m_parent = parent;
@@ -38,13 +39,14 @@ public class GeneralNode {
                 return m_element;
         }
 
-        public GeneralNode get_parent(GeneralNode node) {
+        public GeneralNode get_parent() {
                 return m_parent;
         }
 
         public GeneralNode add_child(int id, SyntacticElement elm) {
                 GeneralNode node = new GeneralNode(this, elm);
                 m_children.put(id, node);
+                m_max_id = Math.max(m_max_id, id);
                 return node;
         }
         
@@ -56,50 +58,19 @@ public class GeneralNode {
                 return m_children.size();
         }
         
-        private void simplify(GeneralNode node) {
-                switch (node.children_size()) {
-                        case 0:
-                                // Do nothing.
-                                break;
-                        case 1:
-                                GeneralNode down = skip(node);
-                                node.m_element = down.m_element;
-                                node.m_children = down.m_children;
-                                simplify(node);
-                                break;
-                        default:
-                                for (int i = 0; i < node.children_size(); i ++) {
-                                        simplify(node.get_child(i));
-                                }
-                                break;
-                }
+        public int max_id() {
+                return m_max_id;
         }
         
-        public void simplify() {
-                simplify(this);
-        }
-        
-        private GeneralNode skip(GeneralNode node) {
-                if (node.children_size() == 1) {
-                        return skip(node.get_child(0));
-                } else {
-                        return node;
-                }
-        }
-        
-        public GeneralNode skip() {
-                return skip(this);
-        }
-        
-        private GeneralNode bottom_left(GeneralNode node) {
+        private SyntacticElement bottom_left(GeneralNode node) {
                 if (node.children_size() == 0) {
-                        return node;
+                        return node.element();
                 } else {
-                        return skip(node.get_child(0));
+                        return bottom_left(node.get_child(0));
                 }
         }
         
-        public GeneralNode bottom_left() {
-                return skip(this);
+        public SyntacticElement bottom_left() {
+                return bottom_left(this);
         }
 }

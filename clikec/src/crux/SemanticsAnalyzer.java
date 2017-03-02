@@ -1,8 +1,7 @@
 package crux;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /*
  * Copyright (C) 2017 davis
@@ -109,7 +108,169 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                         }
                 }
         }
+        
+        private void reduce_expression(GeneralNode node, GeneralNode ast) {
+        }
+        
+        private GeneralNode process(GeneralNode node, GeneralNode ast, int id) {
+                SyntacticElement elm = node.element();
+                if (elm.is(SyntacticElement.Type.NonTerminal)) {
+                        SyntacticElement e = node.bottom_left();
+                        FilePointer pos = null;
+                        if (e.is(SyntacticElement.Type.Terminal)) 
+                                pos = ((Token) e).file_pointer();
+                        switch (((NonTerminal) elm).type()) {
+                                case FUNCTION_DEFINITION: {
+                                        Token func_name = (Token) node.get_child(1).element();
+                                        List<Token> symbols = new ArrayList<>();
+                                        symbols.add(func_name);
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.FunctionDefinition, pos, symbols));
+                                } 
+                                
+                                case VARIABLE_DECLARATION: {
+                                        Token var_name = (Token) node.get_child(1).element();
+                                        List<Token> symbols = new ArrayList<>();
+                                        symbols.add(var_name);
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.VariableDeclaration, pos, symbols));
+                                }
+                                
+                                case ARRAY_DECLARATION: {
+                                        Token arr_name = (Token) node.get_child(1).element();
+                                        List<Token> symbols = new ArrayList<>();
+                                        symbols.add(arr_name);
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.ArrayDeclaration, pos, symbols));
+                                }
+                                
+                                case STATEMENT_LIST: {
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.StatementList, pos));
+                                }
+                                
+                                case CALL_EXPRESSION: {
+                                        Token func_name = (Token) node.get_child(1).element();
+                                        List<Token> symbols = new ArrayList<>();
+                                        symbols.add(func_name);
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.Call, pos, symbols));
+                                }
+                                
+                                case IF_STATEMENT: {
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.IfElseBranch, pos));
+                                }
+                                
+                                case WHILE_STATEMENT: {
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.WhileLoop, pos));
+                                }
+                                
+                                case RETURN_STATEMENT: {
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.Return, pos));
+                                }
+                                
+                                case PARAMETER: {
+                                        GeneralNode func = ast;
+                                        AbstractMetaData meta = (AbstractMetaData) func.element();
+                                        Token param_name = (Token) node.get_child(0).element();
+                                        meta.add_token(param_name);
+                                        break;
+                                }
+                                
+                                case EXPRESSION_LIST: {
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.ExpressionList, pos));
+                                }
+                                
+                                case OP0: {
+                                        Token op_name = (Token) node.get_child(0).element();
+                                        List<Token> symbols = new ArrayList<>();
+                                        symbols.add(op_name);
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.Comparison, pos, symbols));
+                                }
+                                
+                                case OP1: {
+                                        Token op_name = (Token) node.get_child(0).element();
+                                        switch (op_name.type()) {
+                                                case ADD:
+                                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.Addition, pos));
+                                                case SUB:
+                                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.Subtraction, pos));
+                                                case OR:
+                                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.LogicalOr, pos));
+                                                
+                                        }
+                                        break;
+                                }
+                                
+                                case OP2: {
+                                        Token op_name = (Token) node.get_child(0).element();
+                                        switch (op_name.type()) {
+                                                case MUL:
+                                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.Multiplication, pos));
+                                                case DIV:
+                                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.Division, pos));
+                                                case AND:
+                                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.LogicalAnd, pos));
+                                                
+                                        }
+                                        break;
+                                }
+                                
+                                case EXPRESSION0: {
+                                        if (node.children_size() > 1) {
+                                                Token op_name = (Token) node.get_child(1).get_child(0).element();
+                                                List<Token> symbols = new ArrayList<>();
+                                                symbols.add(op_name);
+                                                return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.LogicalAnd, pos, symbols));
+                                        } else {
+                                                break;
+                                        }
+                                }
+                                
+                                case EXPRESSION1: {
+                                        if (node.children_size() > 1) {
+                                                Token op_name = (Token) node.get_child(1).get_child(0).element();
+                                                List<Token> symbols = new ArrayList<>();
+                                                symbols.add(op_name);
+                                                return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.LogicalAnd, pos, symbols));
+                                        } else {
+                                                break;
+                                        }
+                                }
+                                
+                                case EXPRESSION2: {
+                                        break;
+                                }
 
+                                case EXPRESSION3: {
+                                        SyntacticElement child_elm = node.get_child(0).element();
+                                        if (child_elm.is(SyntacticElement.Type.Terminal)) {
+                                                Token op_name = (Token) child_elm;
+                                                switch (op_name.type()) {
+                                                        case NOT:
+                                                                return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.LogicalNot, pos));
+                                                }
+                                        }
+                                        break;
+                                }
+                                
+                                case DESIGNATOR: {
+                                        Token var_name = (Token) node.get_child(0).element();
+                                        List<Token> symbols = new ArrayList<>();
+                                        symbols.add(var_name);
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.AddressOf, pos, symbols));
+                                }
+                                
+                                case ASSIGNMENT_STATEMENT: {
+                                        return ast.add_child(id, new AbstractMetaData(AbstractMetaData.Type.Dereference, pos));
+                                }
+                        }
+                }
+                return ast;
+        }
+        
+        private void build_ast(GeneralNode node, GeneralNode ast, int id) {
+                GeneralNode child = process(node, ast, id);
+                for (int i = 0; i <= node.max_id(); i ++) {
+                        build_ast(node.get_child(i), child, id + i);
+                }
+        }
+  
         @Override
         public AST analyze(ParseTree tree) throws ErrorReport {
                 check(tree.get_root());
@@ -117,6 +278,9 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                         throw m_errs;
                 }
                 AST ast = new AST();
+                Token tok = (Token) tree.get_root().bottom_left();
+                GeneralNode ast_root = ast.create_root(new AbstractMetaData(AbstractMetaData.Type.DeclarationList, tok.file_pointer()));
+                build_ast(tree.get_root(), ast_root, 0);
                 return ast;
         }
 

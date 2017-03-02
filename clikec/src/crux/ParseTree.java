@@ -33,10 +33,6 @@ public class ParseTree {
                 return m_root;
         }
         
-        public void simplify() {
-                m_root.simplify();
-        }
-        
         private void print_node(NonTerminal nonterminal, int depth, StringBuilder pb) {
 
                 String node_data = new String();

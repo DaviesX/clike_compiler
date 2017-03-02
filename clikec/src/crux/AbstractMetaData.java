@@ -55,18 +55,24 @@ public class AbstractMetaData extends SyntacticElement {
         }
         
         private final Type m_type;
+        private final FilePointer m_pos;
         private final List<Token> m_toks = new ArrayList<>();
         
-        public AbstractMetaData(Type type, Token token) {
+        public AbstractMetaData(Type type, FilePointer pos) {
                 super(SyntacticElement.Type.Abstract);
                 m_type = type;
-                m_toks.add(token);
+                m_pos = pos;
         }
         
-        public AbstractMetaData(Type type, ArrayList<Token> token) {
+        public AbstractMetaData(Type type, FilePointer pos, List<Token> token) {
                 super(SyntacticElement.Type.Abstract);
                 m_type = type;
+                m_pos = pos;
                 m_toks.addAll(token);
+        }
+        
+        public void add_token(Token tok) {
+                m_toks.add(tok);
         }
         
         public Type type() {
@@ -86,15 +92,27 @@ public class AbstractMetaData extends SyntacticElement {
                         case LiteralBoolean:
                         case AddressOf:
                         case Dereference:
+                        case Call:
+                        case Comparison:
                                 attri = m_toks.get(0).attribute();
                                 break;
                         case VariableDeclaration:
                         case ArrayDeclaration:
-                        case FunctionDefinition:
                                 attri = "Symbol(" + m_toks.get(0).attribute() + ")";
                                 break;
+                        case FunctionDefinition:
+                                attri = "Symbol(" + m_toks.get(0).attribute() + "), [";
+                                if (m_toks.size() > 1) {
+                                        attri += "Symbol(" + m_toks.get(1).attribute() + ")";
+                                        for (int i = 2; i < m_toks.size(); i ++)
+                                                attri += ", Symbol(" + m_toks.get(i).attribute() + ")";
+                                }
+                                attri += "]";
+                                break;
                 }
-                String ans = "ast." + m_type.toString() + m_toks.get(0).file_pointer();
+                String ans = "ast." + m_type.toString();
+                if (m_pos != null)
+                        ans += "(" + (m_pos.line_no() + 1) + "," + m_pos.column() + ")";
                 if (attri != null) {
                         ans += "[" + attri + "]";
                 }

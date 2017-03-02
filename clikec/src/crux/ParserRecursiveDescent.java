@@ -458,6 +458,10 @@ public class ParserRecursiveDescent implements IParser {
                                 variable_declaration(node.add_child(0, new NonTerminal(
                                         NonTerminal.Type.VARIABLE_DECLARATION)));
                                 break;
+                        case ARRAY:
+                                array_declaration(node.add_child(0, new NonTerminal(
+                                        NonTerminal.Type.ARRAY_DECLARATION)));
+                                break;
                         case CALL:
                                 call_statement(node.add_child(0, new NonTerminal(
                                         NonTerminal.Type.CALL_STATEMENT)));

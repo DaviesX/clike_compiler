@@ -17,8 +17,8 @@
  */
 package crux;
 
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -170,6 +170,7 @@ public class Scanner implements IScanner {
                                 case Character.SPACE_SEPARATOR:
                                 case Character.LINE_SEPARATOR:
                                 case '\n':
+                                case '\t':
                                 case ' ':
                                         fp.mark();
                                         break;

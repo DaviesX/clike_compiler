@@ -47,7 +47,7 @@ public class AST {
                         return;
                 
                 print_node((AbstractMetaData) node.element(), depth, pb);
-                for (int i = 0; i < node.children_size(); i ++) {
+                for (int i = 0; i <= node.max_id(); i ++) {
                         to_string((GeneralNode) node.get_child(i), depth + 1, pb);
                 }
         }
