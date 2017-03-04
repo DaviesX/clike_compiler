@@ -23,5 +23,5 @@ package crux;
  */
 public interface IParser {
         
-        ParseTree parse(IScanner s) throws ErrorReport;
+        void parse(IScanner s, AST ast, ParseTree pt) throws ErrorReport;
 }

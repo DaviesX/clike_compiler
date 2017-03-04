@@ -20,6 +20,35 @@ package crux;
 /**
  * @author davis
  */
-public interface ISemanticsAnalyzer {
-        void analyze(ParseTree tree) throws ErrorReport;
+public class ASTNode extends GeneralNode {
+	
+	public ASTNode(ASTNode parent, int id) {
+		super(parent, null, id);
+	}
+	
+	public int get_id() {
+		return m_id;
+	}
+
+	public void set_element(SyntacticElement elm) {
+		m_element = elm;
+	}
+	
+	public void set_parent(ASTNode parent) {
+		m_parent = parent;
+	}
+
+	public ASTNode make_child(int id) {
+                ASTNode node = new ASTNode(this, id);
+                m_children.put(id, node);
+                m_max_id = Math.max(m_max_id, id);
+                return node;
+	}
+
+	public ASTNode set_child(int id, ASTNode child) {
+		m_children.put(id, child);
+                m_max_id = Math.max(m_max_id, id);
+		return child;
+	}
+	
 }

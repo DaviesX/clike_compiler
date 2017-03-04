@@ -32,9 +32,9 @@ public class AbstractMetaData extends SyntacticElement {
                 ArrayDeclaration,
                 VariableDeclaration,
                 FunctionDefinition,
-                LiteralBoolean,
+                LiteralBool,
                 LiteralFloat,
-                LiteralInteger,
+                LiteralInt,
                 AddressOf,
                 Dereference,
                 Addition,
@@ -88,14 +88,14 @@ public class AbstractMetaData extends SyntacticElement {
                 String attri = null;
                 switch (m_type) {
                         case LiteralFloat:
-                        case LiteralInteger:
-                        case LiteralBoolean:
+                        case LiteralInt:
                         case AddressOf:
-                        case Dereference:
-                        case Call:
-                        case Comparison:
                                 attri = m_toks.get(0).attribute();
                                 break;
+			case LiteralBool:
+				attri = m_toks.get(0).type().toString();
+				break;
+			case Call:
                         case VariableDeclaration:
                         case ArrayDeclaration:
                                 attri = "Symbol(" + m_toks.get(0).attribute() + ")";
@@ -109,6 +109,28 @@ public class AbstractMetaData extends SyntacticElement {
                                 }
                                 attri += "]";
                                 break;
+			case Comparison:
+				switch (m_toks.get(0).type()) {
+					case LESS_THAN:
+						attri = "LT";
+						break;
+					case GREATER_THAN:
+						attri = "GT";
+						break;
+					case EQUAL:
+						attri = "EQ";
+						break;
+					case NOT_EQUAL:
+						attri = "NE";
+						break;
+					case LESSER_EQUAL:
+						attri = "LE";
+						break;
+					case GREATER_EQUAL:
+						attri = "GE";
+						break;
+				}
+				break;
                 }
                 String ans = "ast." + m_type.toString();
                 if (m_pos != null)

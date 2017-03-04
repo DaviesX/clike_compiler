@@ -1,3 +1,4 @@
+
 func main() : void {
-	let a = 1 + 2 + 3 + 4;
+  ::printBool(i and j or k);
 }

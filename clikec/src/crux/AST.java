@@ -22,14 +22,14 @@ package crux;
  */
 public class AST {
         
-        private GeneralNode m_root = null;
+        private ASTNode m_root = null;
 
-        public GeneralNode create_root(AbstractMetaData nt) {
-                m_root = new GeneralNode(null, nt);
+        public ASTNode create_root() {
+                m_root = new ASTNode(null, 0);
                 return m_root;
         }
         
-        public GeneralNode get_root() {
+        public ASTNode get_root() {
                 return m_root;
         }
         
@@ -39,16 +39,17 @@ public class AST {
                         node_data += "  ";
                 }
                 node_data += meta.toString();
+//		System.out.println(node_data);
                 pb.append(node_data).append("\n");
         }
 
-        private void to_string(GeneralNode node, int depth, StringBuilder pb) {
+        private void to_string(ASTNode node, int depth, StringBuilder pb) {
                 if (node == null)
                         return;
                 
-                print_node((AbstractMetaData) node.element(), depth, pb);
+                print_node((AbstractMetaData) node.get_element(), depth, pb);
                 for (int i = 0; i <= node.max_id(); i ++) {
-                        to_string((GeneralNode) node.get_child(i), depth + 1, pb);
+                        to_string((ASTNode) node.get_child(i), depth + 1, pb);
                 }
         }
         

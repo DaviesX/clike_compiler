@@ -25,17 +25,19 @@ import java.util.Map;
  */
 public class GeneralNode {
 
-        protected final GeneralNode m_parent;
+	protected final int m_id;
+        protected GeneralNode m_parent;
         protected SyntacticElement m_element;
         protected Map<Integer, GeneralNode> m_children = new HashMap<>();
         protected int m_max_id = -1;
 
-        public GeneralNode(GeneralNode parent, SyntacticElement elm) {
+        public GeneralNode(GeneralNode parent, SyntacticElement elm, int id) {
                 m_parent = parent;
                 m_element = elm;
+		m_id = id;
         }
 
-        public SyntacticElement element() {
+        public SyntacticElement get_element() {
                 return m_element;
         }
 
@@ -44,7 +46,7 @@ public class GeneralNode {
         }
 
         public GeneralNode add_child(int id, SyntacticElement elm) {
-                GeneralNode node = new GeneralNode(this, elm);
+                GeneralNode node = new GeneralNode(this, elm, id);
                 m_children.put(id, node);
                 m_max_id = Math.max(m_max_id, id);
                 return node;
@@ -64,7 +66,7 @@ public class GeneralNode {
         
         private SyntacticElement bottom_left(GeneralNode node) {
                 if (node.children_size() == 0) {
-                        return node.element();
+                        return node.get_element();
                 } else {
                         return bottom_left(node.get_child(0));
                 }

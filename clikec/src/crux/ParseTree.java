@@ -25,7 +25,7 @@ public class ParseTree {
         private GeneralNode m_root;
 
         public GeneralNode create_root(NonTerminal nt) {
-                m_root = new GeneralNode(null, nt);
+                m_root = new GeneralNode(null, nt, 0);
                 return m_root;
         }
         
@@ -56,10 +56,10 @@ public class ParseTree {
         private void to_string(GeneralNode node, int depth, StringBuilder pb) {
                 if (node == null)
                         return;
-                if (node.element().is(SyntacticElement.Type.Terminal)) {
-                        print_node((Token) node.element(), depth, pb);
+                if (node.get_element().is(SyntacticElement.Type.Terminal)) {
+                        print_node((Token) node.get_element(), depth, pb);
                 } else {
-                        print_node((NonTerminal) node.element(), depth, pb);
+                        print_node((NonTerminal) node.get_element(), depth, pb);
                 }
                 for (int i = 0; i < node.children_size(); i ++) {
                         to_string((GeneralNode) node.get_child(i), depth + 1, pb);
