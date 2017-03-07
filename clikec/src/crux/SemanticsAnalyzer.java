@@ -63,53 +63,51 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                 }
         }
 
-        private void check(GeneralNode node) throws ErrorReport {
-                if (node == null) {
-                        return;
-                }
-                
-                if (node.get_element().is(SyntacticElement.Type.NonTerminal)) {
-                        NonTerminal nt = (NonTerminal) node.get_element();
-                        switch (nt.type()) {
-                                case STATEMENT_BLOCK:
-                                        if (!m_table.is_function_scope()) {
-                                                m_table = m_table.enter_scope();
-                                        } else {
-                                                m_table.unset_function_scope();
-                                        }
-                                        break;
-                                case FUNCTION_DEFINITION:
-                                        declare_symbol((Token) node.get_child(1).get_element());
-                                        m_table = m_table.enter_scope();
-                                        m_table.set_function_scope();
-                                        break;
-                                case VARIABLE_DECLARATION:
-                                case ARRAY_DECLARATION:
-                                        declare_symbol((Token) node.get_child(1).get_element());
-                                        break;
-                                case PARAMETER:
-                                        declare_symbol((Token) node.get_child(0).get_element());
-                                        break;
-                                case CALL_EXPRESSION:
-                                        resolve_symbol((Token) node.get_child(1).get_element());
-                                        break;
-                                case DESIGNATOR:
-                                        resolve_symbol((Token) node.get_child(0).get_element());
-                                        break;
-                        }
-                        for (int i = 0; i < node.children_size(); i++) {
-                                check(node.get_child(i));
-                        }
-                        switch (nt.type()) {
-                                case STATEMENT_BLOCK:
-                                        m_table = m_table.leave_scope();
-                                        break;
-                        }
-                }
-        }
-  
+	private void check(GeneralNode node) throws ErrorReport {
+		if (node == null) {
+			return;
+		}
+
+		AbstractMetaData data = (AbstractMetaData) node.get_element();
+		switch (data.type()) {
+			case StatementList:
+				if (!m_table.is_function_scope()) {
+					m_table = m_table.enter_scope();
+				} else {
+					m_table.unset_function_scope();
+				}
+				break;
+			case FunctionDefinition:
+				List<Token> tokens = data.terminals();
+				declare_symbol(tokens.get(0));
+				m_table = m_table.enter_scope();
+				m_table.set_function_scope();
+				for (int i = 1; i < tokens.size(); i ++)
+					declare_symbol(tokens.get(i));
+				break;
+			case VariableDeclaration:
+			case ArrayDeclaration:
+				declare_symbol((Token) data.terminals().get(0));
+				break;
+			case Call:
+				resolve_symbol((Token) data.terminals().get(0));
+				break;
+			case AddressOf:
+				resolve_symbol((Token) data.terminals().get(0));
+				break;
+		}
+		for (int i = 0; i < node.children_size(); i++) {
+			check(node.get_child(i));
+		}
+		switch (data.type()) {
+			case StatementList:
+				m_table = m_table.leave_scope();
+				break;
+		}
+	}
+
         @Override
-        public void analyze(ParseTree tree) throws ErrorReport {
+        public void analyze(AST tree) throws ErrorReport {
                 check(tree.get_root());
                 if (!m_errs.is_empty()) {
                         throw m_errs;

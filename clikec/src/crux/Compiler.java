@@ -82,7 +82,7 @@ public class Compiler {
                 
                 ISemanticsAnalyzer sa = new SemanticsAnalyzer();
                 try {
-                        sa.analyze(pt);
+                        sa.analyze(ast);
                         System.out.println("Crux program successfully parsed.");
                 } catch (ErrorReport err) {
                         System.out.println("Error parsing file.");
@@ -116,8 +116,8 @@ public class Compiler {
         public static void main(String[] args) throws Exception {
                 //run_lexical_test(args);
                 //run_syntactical_test(args);
-                //run_semantics_test(args);
-                run_semantics_ast_test(args);
+                run_semantics_test(args);
+                //run_semantics_ast_test(args);
         }
 
 }
