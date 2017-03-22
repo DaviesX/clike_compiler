@@ -109,16 +109,21 @@ public class ParserRecursiveDescent implements IParser {
 	private void literal(ASTNode literal_node, GeneralNode node) throws IOException {
 		List<Token> symbols = new ArrayList<>();
 		symbols.add(m_curr_tok);
+                
+                AbstractMetaData meta = (AbstractMetaData) literal_node.get_element();
 		FilePointer pos = m_curr_tok.file_pointer();
 		switch (m_curr_tok.type()) {
 			case INTEGER:
+                                meta.set_type(new StaticType(StaticType.T.INT));
 				literal_node.set_element(new AbstractMetaData(AbstractMetaData.Type.LiteralInt, pos, symbols));
 				break;
 			case FLOAT:
+                                meta.set_type(new StaticType(StaticType.T.FLOAT));
 				literal_node.set_element(new AbstractMetaData(AbstractMetaData.Type.LiteralFloat, pos, symbols));
 				break;
 			case TRUE:
 			case FALSE:
+                                meta.set_type(new StaticType(StaticType.T.BOOL));
 				literal_node.set_element(new AbstractMetaData(AbstractMetaData.Type.LiteralBool, pos, symbols));
 				break;
 		}
@@ -427,9 +432,25 @@ public class ParserRecursiveDescent implements IParser {
 	}
 
 	// type := IDENTIFIER .
-	private void type(ASTNode ast_node, GeneralNode node) throws IOException {
+	private StaticType type(ASTNode ast_node, GeneralNode node) throws IOException {
 		node.add_child(0, m_curr_tok);
+                StaticType type = null;
+                switch (m_curr_tok.attribute()) {
+                        case "int":
+                                type = new StaticType(StaticType.T.INT);
+                                break;
+                        case "float":
+                                type = new StaticType(StaticType.T.FLOAT);
+                                break;
+                        case "bool":
+                                type = new StaticType(StaticType.T.BOOL);
+                                break;
+                        case "void":
+                                type = new StaticType(StaticType.T.VOID);
+                                break;
+                }
 		expect(Token.Lexeme.IDENTIFIER);
+                return type;
 	}
 
 	// variable-declaration := "var" IDENTIFIER ":" type ";" .
@@ -448,7 +469,9 @@ public class ParserRecursiveDescent implements IParser {
 		node.add_child(2, m_curr_tok);
 		expect(Token.Lexeme.COLON);
 
-		type(var_node, node.add_child(3, new NonTerminal(NonTerminal.Type.TYPE)));
+		StaticType type = type(var_node, node.add_child(3, new NonTerminal(NonTerminal.Type.TYPE)));
+                AbstractMetaData meta = (AbstractMetaData) var_node.get_element();
+                meta.set_type(type);
 
 		node.add_child(4, m_curr_tok);
 		expect(Token.Lexeme.SEMICOLON);
@@ -470,8 +493,11 @@ public class ParserRecursiveDescent implements IParser {
 
 		node.add_child(2, m_curr_tok);
 		expect(Token.Lexeme.COLON);
-
-		type(arr_node, node.add_child(3, new NonTerminal(NonTerminal.Type.TYPE)));
+                
+                
+		StaticType type = type(arr_node, node.add_child(3, new NonTerminal(NonTerminal.Type.TYPE)));
+                AbstractMetaData meta = (AbstractMetaData) arr_node.get_element();
+                meta.set_type(new StaticType(type));
 
 		int i_child = 4;
 
@@ -493,7 +519,7 @@ public class ParserRecursiveDescent implements IParser {
 	}
 
 	// parameter := IDENTIFIER ":" type .
-	private void parameter(ASTNode func_node, GeneralNode node) throws IOException {
+	private StaticType parameter(ASTNode func_node, GeneralNode node) throws IOException {
 		AbstractMetaData meta = (AbstractMetaData) func_node.get_element();
 		meta.add_token(m_curr_tok);
 		node.add_child(0, m_curr_tok);
@@ -502,13 +528,15 @@ public class ParserRecursiveDescent implements IParser {
 		node.add_child(1, m_curr_tok);
 		expect(Token.Lexeme.COLON);
 
-		type(func_node, node.add_child(2, new NonTerminal(NonTerminal.Type.TYPE)));
+		return type(func_node, node.add_child(2, new NonTerminal(NonTerminal.Type.TYPE)));
 	}
 
 	// parameter-list := [ parameter { "," parameter } ] .
-	private void parameter_list(ASTNode ast_node, GeneralNode node) throws IOException {
+	private List<StaticType> parameter_list(ASTNode ast_node, GeneralNode node) throws IOException {
+                List<StaticType> arg_types = new ArrayList<>();
 		if (have(Token.Lexeme.IDENTIFIER)) {
-			parameter(ast_node, node.add_child(0, new NonTerminal(NonTerminal.Type.PARAMETER)));
+			StaticType type = parameter(ast_node, node.add_child(0, new NonTerminal(NonTerminal.Type.PARAMETER)));
+                        arg_types.add(type);
 
 			int i_child = 1;
 			while (have(Token.Lexeme.COMMA)) {
@@ -516,10 +544,12 @@ public class ParserRecursiveDescent implements IParser {
 
 				expect(Token.Lexeme.COMMA);
 
-				parameter(ast_node, node.add_child(i_child + 1, new NonTerminal(NonTerminal.Type.PARAMETER)));
+				type = parameter(ast_node, node.add_child(i_child + 1, new NonTerminal(NonTerminal.Type.PARAMETER)));
+                                arg_types.add(type);
 				i_child += 2;
 			}
 		}
+                return arg_types;
 	}
 
 	// assignment-statement := "let" designator "=" expression0 ";" .
@@ -703,7 +733,7 @@ public class ParserRecursiveDescent implements IParser {
 		node.add_child(2, m_curr_tok);
 		expect(Token.Lexeme.OPEN_PAREN);
 
-		parameter_list(func_node, node.add_child(3, new NonTerminal(NonTerminal.Type.PARAMETER_LIST)));
+		List<StaticType> arg_types = parameter_list(func_node, node.add_child(3, new NonTerminal(NonTerminal.Type.PARAMETER_LIST)));
 
 		node.add_child(4, m_curr_tok);
 		expect(Token.Lexeme.CLOSE_PAREN);
@@ -711,7 +741,9 @@ public class ParserRecursiveDescent implements IParser {
 		node.add_child(5, m_curr_tok);
 		expect(Token.Lexeme.COLON);
 
-		type(func_node, node.add_child(6, new NonTerminal(NonTerminal.Type.TYPE)));
+		StaticType ret_type = type(func_node, node.add_child(6, new NonTerminal(NonTerminal.Type.TYPE)));
+                AbstractMetaData meta = (AbstractMetaData) func_node.get_element();
+                meta.set_type(new StaticType(ret_type, arg_types));
 
 		statement_block(func_node.make_child(0), node.add_child(7, new NonTerminal(NonTerminal.Type.STATEMENT_BLOCK)));
 	}

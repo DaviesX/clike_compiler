@@ -57,6 +57,7 @@ public class AbstractMetaData extends SyntacticElement {
         private final Type m_type;
         private final FilePointer m_pos;
         private final List<Token> m_toks = new ArrayList<>();
+        private IType m_atype;
         
         public AbstractMetaData(Type type, FilePointer pos) {
                 super(SyntacticElement.Type.Abstract);
@@ -73,6 +74,14 @@ public class AbstractMetaData extends SyntacticElement {
         
         public void add_token(Token tok) {
                 m_toks.add(tok);
+        }
+
+        public void set_type(IType type) {
+                m_atype = type;
+        }
+        
+        public IType get_type() {
+                return m_atype;
         }
         
         public Type type() {
