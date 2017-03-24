@@ -23,11 +23,13 @@ package crux;
  */
 public class Symbol {
 
-        private final String name;
-        private int m_depth;
+        private final String    m_name;
+        private final IType     m_type;
+        private int             m_depth;
 
-        public Symbol(String name) {
-                this.name = name;
+        public Symbol(String name, IType type) {
+                m_name = name;
+                m_type = type;
         }
         
         public void set_depth(int depth) {
@@ -39,11 +41,15 @@ public class Symbol {
         }
 
         public String name() {
-                return this.name;
+                return m_name;
+        }
+        
+        public IType get_type() {
+                return m_type;
         }
 
         @Override
         public String toString() {
-                return "Symbol(" + name + ")";
+                return "Symbol(" + m_name + ")";
         }
 }

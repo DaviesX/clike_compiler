@@ -82,6 +82,15 @@ public class StaticType implements IType {
 		       ((m_sub_type != null && rhs.m_sub_type != null) && 
 		        (m_type == rhs.m_type && m_sub_type.equals(rhs) && m_sub_type.m_types.equals(rhs.m_types)));
 	}*/
+        
+        @Override
+        public List<IType> sub_decls() {
+                List<IType> sub_decls = new ArrayList<>();
+                m_types.forEach((t) -> {
+                        sub_decls.add(t);
+                });
+                return sub_decls;
+        }
 
 	@Override
 	public IType add(IType that) {
@@ -143,7 +152,7 @@ public class StaticType implements IType {
 	@Override
 	public IType call(IType args) {
 		StaticType t = (StaticType) args;
-		if (t.m_type != T.FUNC || t.m_types.size() != m_types.size())
+		if (t.m_type != T.ARGS || t.m_types.size() != m_types.size())
 			return null;
 		for (int i = 0; i < t.m_types.size(); i ++) {
 			if (m_types.get(i).return_type().m_type != t.m_types.get(i).return_type().m_type)
@@ -151,6 +160,11 @@ public class StaticType implements IType {
 		}
 		return return_type();
 	}
+        
+        @Override
+        public IType ret(IType value) {
+                return return_type().m_type == ((StaticType) value).return_type().m_type ? value : null;
+        }
 
 	@Override
 	public IType assign(IType source) {

@@ -110,21 +110,24 @@ public class ParserRecursiveDescent implements IParser {
 		List<Token> symbols = new ArrayList<>();
 		symbols.add(m_curr_tok);
                 
-                AbstractMetaData meta = (AbstractMetaData) literal_node.get_element();
+                AbstractMetaData meta;
 		FilePointer pos = m_curr_tok.file_pointer();
 		switch (m_curr_tok.type()) {
 			case INTEGER:
+                                meta = new AbstractMetaData(AbstractMetaData.Type.LiteralInt, pos, symbols);
                                 meta.set_type(new StaticType(StaticType.T.INT));
-				literal_node.set_element(new AbstractMetaData(AbstractMetaData.Type.LiteralInt, pos, symbols));
+				literal_node.set_element(meta);
 				break;
 			case FLOAT:
+                                meta = new AbstractMetaData(AbstractMetaData.Type.LiteralFloat, pos, symbols);
                                 meta.set_type(new StaticType(StaticType.T.FLOAT));
-				literal_node.set_element(new AbstractMetaData(AbstractMetaData.Type.LiteralFloat, pos, symbols));
+				literal_node.set_element(meta);
 				break;
 			case TRUE:
 			case FALSE:
+                                meta = new AbstractMetaData(AbstractMetaData.Type.LiteralFloat, pos, symbols);
                                 meta.set_type(new StaticType(StaticType.T.BOOL));
-				literal_node.set_element(new AbstractMetaData(AbstractMetaData.Type.LiteralBool, pos, symbols));
+				literal_node.set_element(meta);
 				break;
 		}
 		
@@ -496,8 +499,6 @@ public class ParserRecursiveDescent implements IParser {
                 
                 
 		StaticType type = type(arr_node, node.add_child(3, new NonTerminal(NonTerminal.Type.TYPE)));
-                AbstractMetaData meta = (AbstractMetaData) arr_node.get_element();
-                meta.set_type(new StaticType(type));
 
 		int i_child = 4;
 
@@ -510,10 +511,16 @@ public class ParserRecursiveDescent implements IParser {
 
 			node.add_child(i_child + 2, m_curr_tok);
 			expect(Token.Lexeme.CLOSE_BRACKET);
+                        
+                        // Nesting array.
+                        type = new StaticType(type);
 
 			i_child += 3;
 		} while (!have(Token.Lexeme.SEMICOLON));
 
+                AbstractMetaData meta = (AbstractMetaData) arr_node.get_element();
+                meta.set_type(type);
+                
 		node.add_child(i_child, m_curr_tok);
 		expect(Token.Lexeme.SEMICOLON);
 	}

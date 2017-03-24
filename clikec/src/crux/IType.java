@@ -17,10 +17,13 @@
  */
 package crux;
 
+import java.util.List;
+
 /**
  * @author davis
  */
 public interface IType {
+        List<IType> sub_decls();
 	IType add(IType that);
 	IType sub(IType that);
 	IType mul(IType that);
@@ -33,4 +36,5 @@ public interface IType {
 	IType index(IType that);
 	IType call(IType args);
 	IType assign(IType source);
+        IType ret(IType value);
 }
