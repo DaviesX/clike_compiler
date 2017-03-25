@@ -128,11 +128,13 @@ public class StaticType implements IType {
         }
         
         private String build_array_string(StringBuilder b, StaticType type) {
-                b.append("array[").append(m_dim).append(",");
-                if (type.m_sub_type.m_type != T.ARRAY)  b.append(type.type_string());
+                b.append("array[").append(type.m_dim).append(",");
+                if (type.m_sub_type.m_type != T.ARRAY)  b.append(type.m_sub_type.type_string());
                 else                                    b.append(build_array_string(b, type.m_sub_type));
                 b.append("]");
-                return b.toString();
+                String s = b.toString();
+                b.setLength(0);
+                return s;
         }
         
         private String build_args_string(StringBuilder b, List<StaticType> args) {
@@ -242,20 +244,28 @@ public class StaticType implements IType {
 	public IType compare(IType that) throws TypeError {
 		if (return_type().m_type == ((StaticType) that).m_type && 
 		    (return_type().m_type == T.INT || return_type().m_type == T.FLOAT)) {
-                        return return_type();
+                        return new StaticType(T.BOOL);
                 } else {
                         throw new TypeError("Cannot compare " + return_type().type_string() + " with " + ((StaticType) that).type_string() + ".");
                 }
 	}
 
 	@Override
-	public IType deref() {
-		return return_type();
+	public IType deref() throws TypeError {
+                if (m_type == T.BOOL || m_type == T.INT || m_type == T.FLOAT || m_type == T.ARRAY)
+                        return return_type();
+                else
+                        throw new TypeError("Cannot dereference " + return_type().type_string());
 	}
 
 	@Override
-	public IType index(IType that) {
-		return ((StaticType) that).m_type == T.INT ? return_type().m_sub_type : null;
+	public IType index(IType that) throws TypeError {
+		if (m_type == T.ARRAY && ((StaticType) that).m_type == T.INT) {
+                        return return_type().m_sub_type;
+                } else {
+                        throw new TypeError("Cannot index Address(" + return_type().type_string() 
+                                + ") with " + ((StaticType) that).type_string() + ".");
+                }
 	}
 
 	@Override
@@ -275,7 +285,7 @@ public class StaticType implements IType {
                 if (is_compatible) {
                         return return_type();
                 } else {
-                        throw new TypeError("Cannot call " + func_name + type_string() + " using " + ((StaticType) args).type_string() + ".");
+                        throw new TypeError("Cannot call func" + type_string() + " using " + ((StaticType) args).type_string() + ".");
                 }
 	}
         
@@ -297,7 +307,7 @@ public class StaticType implements IType {
                         return return_type();
                 } else {
                         throw new TypeError("Cannot assign "
-                                        + ((StaticType) source).type_string() + " to Address(" + return_type().type_string() + ")");
+                                        + ((StaticType) source).type_string() + " to Address(" + return_type().type_string() + ").");
                 }
 	}
         
@@ -322,11 +332,31 @@ public class StaticType implements IType {
                                 }
                                 break;
                         case ARRAY:
+                                StaticType base = this;
+                                do {
+                                        base = base.m_sub_type;
+                                } while (base.m_type == T.ARRAY);
+                                if (base.m_type == T.VOID)
+                                        throw new TypeError("Array " + name + " has invalid base type void.");
                                 break;
                         case VOID:
                                 if (m_type == T.VOID)
                                         throw new TypeError("Variable " + name + " has invalid type void.");
                                 break;
                 }
+        }
+        
+        @Override
+        public void check_cond(String constr) throws TypeError {
+                if (m_type != T.BOOL)
+                        throw new TypeError(constr + " requires bool condition not " + type_string() + ".");
+        }
+        
+        @Override
+        public boolean has_return() {
+                if (m_type == T.FUNC)
+                        return m_sub_type.m_type != T.VOID && m_sub_type.m_type != T.NULL;
+                else
+                        return true;
         }
 }

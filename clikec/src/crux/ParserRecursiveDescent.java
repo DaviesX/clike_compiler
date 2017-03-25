@@ -512,6 +512,7 @@ public class ParserRecursiveDescent implements IParser {
 
 		int i_child = 4;
 
+                List<String> arr_dims = new ArrayList<>();
 		do {
                         String dim;
                         
@@ -519,17 +520,20 @@ public class ParserRecursiveDescent implements IParser {
 			expect(Token.Lexeme.OPEN_BRACKET);
 
 			node.add_child(i_child + 1, m_curr_tok);
-                        dim = m_curr_tok.attribute();
+                        arr_dims.add(m_curr_tok.attribute());
 			expect(Token.Lexeme.INTEGER);
                         
 			node.add_child(i_child + 2, m_curr_tok);
 			expect(Token.Lexeme.CLOSE_BRACKET);
                         
-                        // Nesting array.
-                        type = new StaticType(type, Integer.parseInt(dim));
+
 
 			i_child += 3;
 		} while (!have(Token.Lexeme.SEMICOLON));
+                
+                // Nesting array.
+                for (int i = arr_dims.size() - 1; i >= 0; i --)
+                        type = new StaticType(type, Integer.parseInt(arr_dims.get(i)));
 
                 AbstractMetaData meta = (AbstractMetaData) arr_node.get_element();
                 meta.set_type(type);

@@ -113,6 +113,29 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                 }
                 return types;
         }
+        
+        private boolean has_return(ASTNode node) {
+                if (node == null)
+                        return false;
+                
+                AbstractMetaData data = (AbstractMetaData) node.get_element();
+                if (data.type() == AbstractMetaData.Type.Return) {
+                        return true;
+                }
+
+                if (data.type() == AbstractMetaData.Type.WhileLoop) {
+                        return false;
+                } else if (data.type() != AbstractMetaData.Type.IfElseBranch) {
+                        for (int i = 0; i < node.children_size(); i++) {
+                                if (has_return((ASTNode) node.get_child(i))) {
+                                        return true;
+                                }
+                        }
+                        return false;
+                } else {
+                        return has_return((ASTNode) node.get_child(1)) && has_return((ASTNode) node.get_child(2));
+                }
+        }
 
 	private void check(ASTNode node) throws ErrorReport {
 		if (node == null) {
@@ -165,12 +188,17 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                                 try {
                                         if ("main".equals(data.terminals().get(0).attribute())) {
                                                 m_has_main = true;
-
                                                 data.get_type().check_entrance();
                                         }
                                         data.get_type().check_decl(m_curr_func.name());
                                 } catch (TypeError e) {
                                         log_type_error(node.get_pos(), e.get_msg());
+                                }
+                                
+                                if (data.get_type().has_return()) {
+                                        if (!has_return(node))
+                                                log_type_error(node.get_pos(), "Not all paths in function " 
+                                                        + m_curr_func.name() + " have a return.");
                                 }
 
                                 m_curr_func = null;
@@ -245,15 +273,23 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                                 break;
                                 
                         case Index:
-                                t = types.get(0).index(types.get(1));
-                                if (t == null) {
-                                        log_type_error(node.get_pos(), "Index must be of type int.");
-                                        data.set_type(new StaticType(StaticType.T.BOOL));
+                                try {
+                                        t = types.get(0).index(types.get(1));
+                                        data.set_type(t);
+                                } catch (TypeError err) {
+                                        log_type_error(node.get_pos(), err.get_msg());
+                                        data.set_type(new StaticType(err));
                                 }
                                 break;
                                 
                         case Dereference:
-                                data.set_type(types.get(0));
+                                try {
+                                        t = types.get(0).deref();
+                                        data.set_type(t);
+                                } catch (TypeError err) {
+                                        log_type_error(node.get_pos(), err.get_msg());
+                                        data.set_type(new StaticType(err));
+                                }
                                 break;
                                 
                         case Call:
@@ -268,6 +304,7 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                                                 data.set_type(s.get_type());
                                         } catch (TypeError err) {
                                                 log_type_error(node.get_pos(), err.get_msg());
+                                                data.set_type(new StaticType(err));
                                         }
                                 }
                                 break;
@@ -319,6 +356,22 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                                         data.set_type(types.get(0));
                                 } else {
                                         data.set_type(t);
+                                }
+                                break;
+                                
+                        case IfElseBranch:
+                                try {
+                                        types.get(0).check_cond("IfElseBranch");
+                                } catch (TypeError err) {
+                                        log_type_error(node.get_pos(), err.get_msg());
+                                }
+                                break;
+                                
+                        case WhileLoop:
+                                try {
+                                        types.get(0).check_cond("WhileLoop");
+                                } catch (TypeError err) {
+                                        log_type_error(node.get_pos(), err.get_msg());
                                 }
                                 break;
 		}

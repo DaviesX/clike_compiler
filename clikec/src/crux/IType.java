@@ -41,4 +41,7 @@ public interface IType {
         
         void check_entrance() throws TypeError;
         void check_decl(String name) throws TypeError;
+        void check_cond(String constr) throws TypeError;
+        
+        boolean has_return();
 }
