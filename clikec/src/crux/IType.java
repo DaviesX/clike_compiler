@@ -24,17 +24,21 @@ import java.util.List;
  */
 public interface IType {
         List<IType> sub_decls();
-	IType add(IType that);
-	IType sub(IType that);
-	IType mul(IType that);
-	IType div(IType that);
-	IType and(IType that);
-	IType or(IType that);
-	IType not();
-	IType compare(IType that);
-	IType deref();
-	IType index(IType that);
-	IType call(IType args);
-	IType assign(IType source);
-        IType ret(IType value);
+        
+	IType add(IType that) throws TypeError;
+	IType sub(IType that) throws TypeError;
+	IType mul(IType that) throws TypeError;
+	IType div(IType that) throws TypeError;
+	IType and(IType that) throws TypeError;
+	IType or(IType that) throws TypeError;
+	IType not() throws TypeError;
+	IType compare(IType that) throws TypeError;
+	IType deref() throws TypeError;
+	IType index(IType that) throws TypeError;
+	IType call(IType args, String func_name) throws TypeError;
+	IType assign(IType source) throws TypeError;
+        IType ret(IType value, String func_name) throws TypeError;
+        
+        void check_entrance() throws TypeError;
+        void check_decl(String name) throws TypeError;
 }

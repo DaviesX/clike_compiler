@@ -21,10 +21,17 @@ package crux;
  * @author davis
  */
 public class ASTNode extends GeneralNode {
+        
+        private final FilePointer       m_pos;
 	
-	public ASTNode(ASTNode parent, int id) {
+	public ASTNode(ASTNode parent, FilePointer fp, int id) {
 		super(parent, null, id);
+                m_pos = fp;
 	}
+        
+        public FilePointer get_pos() {
+                return m_pos;
+        }
 	
 	public int get_id() {
 		return m_id;
@@ -38,8 +45,8 @@ public class ASTNode extends GeneralNode {
 		m_parent = parent;
 	}
 
-	public ASTNode make_child(int id) {
-                ASTNode node = new ASTNode(this, id);
+	public ASTNode make_child(int id, FilePointer fp) {
+                ASTNode node = new ASTNode(this, fp, id);
                 m_children.put(id, node);
                 m_max_id = Math.max(m_max_id, id);
                 return node;

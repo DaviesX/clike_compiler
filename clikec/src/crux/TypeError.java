@@ -20,17 +20,17 @@ package crux;
 /**
  * @author davis
  */
-public class CompilingError extends RuntimeException {
+public class TypeError extends CompilingError {
         
-        protected final String m_error;
-        
-        public CompilingError(String err) {
-                super(err);
-                m_error = err;
+        public TypeError(FilePointer fp, String err) {
+                super("TypeError" + "(" + (fp.line_no() + 1) + "," + fp.column() + ")[" + err + "]");
         }
         
-        @Override
-        public String toString() {
+        public TypeError(String err) {
+                super(err);
+        }
+        
+        public String get_msg() {
                 return m_error;
         }
 }

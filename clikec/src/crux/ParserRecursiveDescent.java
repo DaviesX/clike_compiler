@@ -115,18 +115,18 @@ public class ParserRecursiveDescent implements IParser {
 		switch (m_curr_tok.type()) {
 			case INTEGER:
                                 meta = new AbstractMetaData(AbstractMetaData.Type.LiteralInt, pos, symbols);
-                                meta.set_type(new StaticType(StaticType.T.INT));
+                                meta.set_type(new StaticType("int"));
 				literal_node.set_element(meta);
 				break;
 			case FLOAT:
                                 meta = new AbstractMetaData(AbstractMetaData.Type.LiteralFloat, pos, symbols);
-                                meta.set_type(new StaticType(StaticType.T.FLOAT));
+                                meta.set_type(new StaticType("float"));
 				literal_node.set_element(meta);
 				break;
 			case TRUE:
 			case FALSE:
                                 meta = new AbstractMetaData(AbstractMetaData.Type.LiteralFloat, pos, symbols);
-                                meta.set_type(new StaticType(StaticType.T.BOOL));
+                                meta.set_type(new StaticType("bool"));
 				literal_node.set_element(meta);
 				break;
 		}
@@ -227,13 +227,14 @@ public class ParserRecursiveDescent implements IParser {
 				add(Token.Lexeme.GREATER_THAN);
 			}
 		})) {
-			ASTNode op = new ASTNode((ASTNode) lhs.get_parent(), lhs.get_id());
+			ASTNode op = new ASTNode((ASTNode) lhs.get_parent(), m_curr_tok.file_pointer(), lhs.get_id());
 			lhs.set_parent(op);
 			((ASTNode) op.get_parent()).set_child(op.get_id(), op);
 			
 			op.set_child(0, lhs);
 			op0(op, node.add_child(1, new NonTerminal(NonTerminal.Type.OP0)));
-			expression1(op.make_child(1), node.add_child(2, new NonTerminal(NonTerminal.Type.EXPRESSION1)));
+			expression1(op.make_child(1, m_curr_tok.file_pointer()), 
+                                    node.add_child(2, new NonTerminal(NonTerminal.Type.EXPRESSION1)));
 			
 			lhs = op;
 		}
@@ -253,13 +254,14 @@ public class ParserRecursiveDescent implements IParser {
 				add(Token.Lexeme.OR);
 			}
 		})) {
-			ASTNode op = new ASTNode((ASTNode) lhs.get_parent(), lhs.get_id());
+			ASTNode op = new ASTNode((ASTNode) lhs.get_parent(), m_curr_tok.file_pointer(), lhs.get_id());
 			lhs.set_parent(op);
 			((ASTNode) op.get_parent()).set_child(op.get_id(), op);
 			
 			op.set_child(0, lhs);
 			op1(op, node.add_child(i_child, new NonTerminal(NonTerminal.Type.OP1)));
-			expression2(op.make_child(1), node.add_child(i_child + 1, new NonTerminal(NonTerminal.Type.EXPRESSION2)));
+			expression2(op.make_child(1, m_curr_tok.file_pointer()), 
+                                    node.add_child(i_child + 1, new NonTerminal(NonTerminal.Type.EXPRESSION2)));
 			
 			lhs = op;
 			i_child += 2;
@@ -280,13 +282,14 @@ public class ParserRecursiveDescent implements IParser {
 				add(Token.Lexeme.AND);
 			}
 		})) {
-			ASTNode op = new ASTNode((ASTNode) lhs.get_parent(), lhs.get_id());
+			ASTNode op = new ASTNode((ASTNode) lhs.get_parent(), m_curr_tok.file_pointer(), lhs.get_id());
 			lhs.set_parent(op);
 			((ASTNode) op.get_parent()).set_child(op.get_id(), op);
 			
 			op.set_child(0, lhs);
 			op2(op, node.add_child(i_child, new NonTerminal(NonTerminal.Type.OP2)));
-			expression3(op.make_child(1), node.add_child(i_child + 1, new NonTerminal(NonTerminal.Type.EXPRESSION3)));
+			expression3(op.make_child(1, m_curr_tok.file_pointer()), 
+                                    node.add_child(i_child + 1, new NonTerminal(NonTerminal.Type.EXPRESSION3)));
 
 			lhs = op;
 			i_child += 2;
@@ -305,7 +308,8 @@ public class ParserRecursiveDescent implements IParser {
 				expr_node.set_element(new AbstractMetaData(AbstractMetaData.Type.LogicalNot, m_curr_tok.file_pointer()));
 				node.add_child(0, m_curr_tok);
 				expect(Token.Lexeme.NOT);
-				expression3(expr_node.make_child(0), node.add_child(1, new NonTerminal(NonTerminal.Type.EXPRESSION3)));
+				expression3(expr_node.make_child(0, m_curr_tok.file_pointer()), 
+                                            node.add_child(1, new NonTerminal(NonTerminal.Type.EXPRESSION3)));
 				break;
 			case OPEN_PAREN:
 				node.add_child(0, m_curr_tok);
@@ -362,13 +366,14 @@ public class ParserRecursiveDescent implements IParser {
 				add(Token.Lexeme.CALL);
 			}
 		})) {
-			exprl_node = expression0(exprl_node.make_child(0), node.add_child(0, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
+			exprl_node = expression0(exprl_node.make_child(0, m_curr_tok.file_pointer()), 
+                                                 node.add_child(0, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
 			int i_child = 1;
 			while (have(Token.Lexeme.COMMA)) {
 				node.add_child(i_child, m_curr_tok);
 				expect(Token.Lexeme.COMMA);
-				exprl_node = expression0(exprl_node.make_child(i_child), node.add_child(i_child + 1,
-					new NonTerminal(NonTerminal.Type.EXPRESSION0)));
+				exprl_node = expression0(exprl_node.make_child(i_child, m_curr_tok.file_pointer()), 
+                                                         node.add_child(i_child + 1, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
 				i_child += 2;
 			}
 		}
@@ -390,7 +395,8 @@ public class ParserRecursiveDescent implements IParser {
 		node.add_child(2, m_curr_tok);
 		expect(Token.Lexeme.OPEN_PAREN);
 
-		expression_list(call_node.make_child(0), node.add_child(3, new NonTerminal(NonTerminal.Type.EXPRESSION_LIST)));
+		expression_list(call_node.make_child(0, m_curr_tok.file_pointer()), 
+                                node.add_child(3, new NonTerminal(NonTerminal.Type.EXPRESSION_LIST)));
 
 		node.add_child(4, m_curr_tok);
 		expect(Token.Lexeme.CLOSE_PAREN);
@@ -402,7 +408,7 @@ public class ParserRecursiveDescent implements IParser {
 		
 		if (is_dereference) {
 			desi_node.set_element(new AbstractMetaData(AbstractMetaData.Type.Dereference, pos));
-			desi_node = desi_node.make_child(0);
+			desi_node = desi_node.make_child(0, m_curr_tok.file_pointer());
 		}
 		
 		List<Token> symbols = new ArrayList<>();
@@ -418,13 +424,14 @@ public class ParserRecursiveDescent implements IParser {
 			node.add_child(i_child, m_curr_tok);
 			expect(Token.Lexeme.OPEN_BRACKET);
 
-			ASTNode index = new ASTNode((ASTNode) lhs.get_parent(), lhs.get_id());
+			ASTNode index = new ASTNode((ASTNode) lhs.get_parent(), m_curr_tok.file_pointer(), lhs.get_id());
 			lhs.set_parent(index);
 			((ASTNode) index.get_parent()).set_child(index.get_id(), index);
 			
 			index.set_child(0, lhs);
 			index.set_element(new AbstractMetaData(AbstractMetaData.Type.Index, m_curr_tok.file_pointer()));
-			expression0(index.make_child(1), node.add_child(i_child + 1, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
+			expression0(index.make_child(1, m_curr_tok.file_pointer()), 
+                                    node.add_child(i_child + 1, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
 
 			node.add_child(i_child + 2, m_curr_tok);
 			expect(Token.Lexeme.CLOSE_BRACKET);
@@ -440,16 +447,19 @@ public class ParserRecursiveDescent implements IParser {
                 StaticType type = null;
                 switch (m_curr_tok.attribute()) {
                         case "int":
-                                type = new StaticType(StaticType.T.INT);
+                                type = new StaticType("int");
                                 break;
                         case "float":
-                                type = new StaticType(StaticType.T.FLOAT);
+                                type = new StaticType("float");
                                 break;
                         case "bool":
-                                type = new StaticType(StaticType.T.BOOL);
+                                type = new StaticType("bool");
                                 break;
                         case "void":
-                                type = new StaticType(StaticType.T.VOID);
+                                type = new StaticType("void");
+                                break;
+                        default:
+                                type = new StaticType(m_curr_tok.attribute());
                                 break;
                 }
 		expect(Token.Lexeme.IDENTIFIER);
@@ -503,17 +513,20 @@ public class ParserRecursiveDescent implements IParser {
 		int i_child = 4;
 
 		do {
+                        String dim;
+                        
 			node.add_child(i_child, m_curr_tok);
 			expect(Token.Lexeme.OPEN_BRACKET);
 
 			node.add_child(i_child + 1, m_curr_tok);
+                        dim = m_curr_tok.attribute();
 			expect(Token.Lexeme.INTEGER);
-
+                        
 			node.add_child(i_child + 2, m_curr_tok);
 			expect(Token.Lexeme.CLOSE_BRACKET);
                         
                         // Nesting array.
-                        type = new StaticType(type);
+                        type = new StaticType(type, Integer.parseInt(dim));
 
 			i_child += 3;
 		} while (!have(Token.Lexeme.SEMICOLON));
@@ -566,12 +579,14 @@ public class ParserRecursiveDescent implements IParser {
 		node.add_child(0, m_curr_tok);
 		expect(Token.Lexeme.LET);
 
-		designator(assign_node.make_child(0), false, node.add_child(1, new NonTerminal(NonTerminal.Type.DESIGNATOR)));
+		designator(assign_node.make_child(0, m_curr_tok.file_pointer()), 
+                           false, node.add_child(1, new NonTerminal(NonTerminal.Type.DESIGNATOR)));
 
 		node.add_child(2, m_curr_tok);
 		expect(Token.Lexeme.ASSIGN);
 
-		expression0(assign_node.make_child(1), node.add_child(3, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
+		expression0(assign_node.make_child(1, m_curr_tok.file_pointer()), 
+                            node.add_child(3, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
 
 		node.add_child(4, m_curr_tok);
 		expect(Token.Lexeme.SEMICOLON);
@@ -591,16 +606,20 @@ public class ParserRecursiveDescent implements IParser {
 		node.add_child(0, m_curr_tok);
 		expect(Token.Lexeme.IF);
 
-		expression0(if_node.make_child(0), node.add_child(1, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
-		statement_block(if_node.make_child(1), node.add_child(2, new NonTerminal(NonTerminal.Type.STATEMENT_BLOCK)));
+		expression0(if_node.make_child(0, m_curr_tok.file_pointer()), 
+                            node.add_child(1, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
+		statement_block(if_node.make_child(1, m_curr_tok.file_pointer()), 
+                                node.add_child(2, new NonTerminal(NonTerminal.Type.STATEMENT_BLOCK)));
 
 		if (have(Token.Lexeme.ELSE)) {
 			node.add_child(3, m_curr_tok);
 			expect(Token.Lexeme.ELSE);
 
-			statement_block(if_node.make_child(2), node.add_child(4, new NonTerminal(NonTerminal.Type.STATEMENT_BLOCK)));
+			statement_block(if_node.make_child(2, m_curr_tok.file_pointer()), 
+                                        node.add_child(4, new NonTerminal(NonTerminal.Type.STATEMENT_BLOCK)));
 		} else {
-			if_node.make_child(2).set_element(new AbstractMetaData(AbstractMetaData.Type.StatementList, m_curr_tok.file_pointer()));
+			if_node.make_child(2, m_curr_tok.file_pointer()).
+                                set_element(new AbstractMetaData(AbstractMetaData.Type.StatementList, m_curr_tok.file_pointer()));
 		}
 	}
 
@@ -611,8 +630,10 @@ public class ParserRecursiveDescent implements IParser {
 		node.add_child(0, m_curr_tok);
 		expect(Token.Lexeme.WHILE);
 		
-		expression0(while_node.make_child(0), node.add_child(1, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
-		statement_block(while_node.make_child(1), node.add_child(2, new NonTerminal(NonTerminal.Type.STATEMENT_BLOCK)));
+		expression0(while_node.make_child(0, m_curr_tok.file_pointer()), 
+                            node.add_child(1, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
+		statement_block(while_node.make_child(1, m_curr_tok.file_pointer()), 
+                                node.add_child(2, new NonTerminal(NonTerminal.Type.STATEMENT_BLOCK)));
 	}
 
 	// return-statement := "return" expression0 ";" .
@@ -622,7 +643,8 @@ public class ParserRecursiveDescent implements IParser {
 		node.add_child(0, m_curr_tok);
 		expect(Token.Lexeme.RETURN);
 
-		expression0(return_node.make_child(0), node.add_child(1, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
+		expression0(return_node.make_child(0, m_curr_tok.file_pointer()), 
+                            node.add_child(1, new NonTerminal(NonTerminal.Type.EXPRESSION0)));
 
 		node.add_child(2, m_curr_tok);
 		expect(Token.Lexeme.SEMICOLON);
@@ -694,7 +716,8 @@ public class ParserRecursiveDescent implements IParser {
 				add(Token.Lexeme.RETURN);
 			}
 		})) {
-			statement(stmt_node.make_child(i_child), node.add_child(i_child, new NonTerminal(NonTerminal.Type.STATEMENT)));
+			statement(stmt_node.make_child(i_child, m_curr_tok.file_pointer()), 
+                                  node.add_child(i_child, new NonTerminal(NonTerminal.Type.STATEMENT)));
 			i_child++;
 		}
 	}
@@ -752,7 +775,8 @@ public class ParserRecursiveDescent implements IParser {
                 AbstractMetaData meta = (AbstractMetaData) func_node.get_element();
                 meta.set_type(new StaticType(ret_type, arg_types));
 
-		statement_block(func_node.make_child(0), node.add_child(7, new NonTerminal(NonTerminal.Type.STATEMENT_BLOCK)));
+		statement_block(func_node.make_child(0, m_curr_tok.file_pointer()), 
+                                node.add_child(7, new NonTerminal(NonTerminal.Type.STATEMENT_BLOCK)));
 	}
 
 	// declaration := variable-declaration | array-declaration | function-definition .
@@ -794,7 +818,8 @@ public class ParserRecursiveDescent implements IParser {
 				add(Token.Lexeme.ARRAY);
 			}
 		})) {
-			declaration(ast_node.make_child(i_child), node.add_child(i_child, new NonTerminal(NonTerminal.Type.DECLARATION)));
+			declaration(ast_node.make_child(i_child, m_curr_tok.file_pointer()), 
+                                    node.add_child(i_child, new NonTerminal(NonTerminal.Type.DECLARATION)));
 			i_child++;
 		}
 	}
@@ -802,7 +827,7 @@ public class ParserRecursiveDescent implements IParser {
 	// program := declaration-list EOF .
 	private void program(AST ast, ParseTree tree) throws IOException {
 		GeneralNode root = tree.create_root(new NonTerminal(NonTerminal.Type.PROGRAM));
-		ASTNode ast_root = ast.create_root();
+		ASTNode ast_root = ast.create_root(m_curr_tok.file_pointer());
 
 		declaration_list(ast_root, root.add_child(0, new NonTerminal(NonTerminal.Type.DECLARATION_LIST)));
 	}

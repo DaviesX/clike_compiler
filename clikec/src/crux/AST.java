@@ -24,8 +24,8 @@ public class AST {
         
         private ASTNode m_root = null;
 
-        public ASTNode create_root() {
-                m_root = new ASTNode(null, 0);
+        public ASTNode create_root(FilePointer fp) {
+                m_root = new ASTNode(null, fp, 0);
                 return m_root;
         }
         

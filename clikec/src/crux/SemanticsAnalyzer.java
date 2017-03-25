@@ -25,9 +25,10 @@ import java.util.List;
  */
 public class SemanticsAnalyzer implements ISemanticsAnalyzer {
 
-        private SymbolTable m_table = new SymbolTable();
-        private final ErrorReport m_errs = new ErrorReport();
-        private Symbol m_curr_func = null;
+        private SymbolTable             m_table = new SymbolTable();
+        private final ErrorReport       m_errs = new ErrorReport();
+        private Symbol                  m_curr_func = null;
+        private boolean                 m_has_main = false;
 
         public SemanticsAnalyzer() {
                 // Preload symbols.
@@ -81,8 +82,8 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                 }
         }
         
-        private void log_type_error(String error) {
-                System.out.println(error);
+        private void log_type_error(FilePointer fp, String error) {
+                m_errs.add(new TypeError(fp, error));
         }
 
         private Symbol declare_symbol(Token t, IType type) {
@@ -103,7 +104,7 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                 return sym;
         }
         
-        private static List<StaticType> get_operand_type(GeneralNode node) {
+        private static List<StaticType> get_operand_type(ASTNode node) {
                 List<StaticType> types = new ArrayList<>();
                 for (int i = 0; i <= node.max_id(); i ++) {
                         GeneralNode op = node.get_child(i);
@@ -113,7 +114,7 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
                 return types;
         }
 
-	private void check(GeneralNode node) throws ErrorReport {
+	private void check(ASTNode node) throws ErrorReport {
 		if (node == null) {
 			return;
 		}
@@ -149,10 +150,9 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
 		}
 		
                 for (int i = 0; i < node.children_size(); i++) {
-			check(node.get_child(i));
+			check((ASTNode) node.get_child(i));
 		}
                 
-                AbstractMetaData meta = (AbstractMetaData) node.get_element();
                 List<StaticType> types = get_operand_type(node);
                 IType t;
                 Symbol s;
@@ -160,143 +160,165 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
 			case StatementList:
 				m_table = m_table.leave_scope();
 				break;
-                                
+
                         case FunctionDefinition:
+                                try {
+                                        if ("main".equals(data.terminals().get(0).attribute())) {
+                                                m_has_main = true;
+
+                                                data.get_type().check_entrance();
+                                        }
+                                        data.get_type().check_decl(m_curr_func.name());
+                                } catch (TypeError e) {
+                                        log_type_error(node.get_pos(), e.get_msg());
+                                }
+
                                 m_curr_func = null;
                                 break;
-                        
-                        case Comparison: 
-                                t = types.get(0).compare(types.get(1));
-                                if (t == null) {
-                                        log_type_error("Comparison must have same type.");
-                                        meta.set_type(new StaticType(StaticType.T.BOOL));
-                                } else {
-                                        meta.set_type(t);
+                                
+                        case VariableDeclaration:
+                        case ArrayDeclaration:
+                                try {
+                                        data.get_type().check_decl(data.terminals().get(0).attribute());
+                                } catch (TypeError err) {
+                                        log_type_error(node.get_pos(), err.get_msg());
+                                }
+                                break;
+
+                        case Comparison:
+                                try {
+                                        t = types.get(0).compare(types.get(1));
+                                        data.set_type(t);
+                                } catch (TypeError err) {
+                                        log_type_error(node.get_pos(), err.get_msg());
+                                        data.set_type(new StaticType(err));
                                 }
                                 break;
                                 
                         case LogicalOr:
-                                t = types.get(0).or(types.get(1));
-                                if (t == null) {
-                                        log_type_error("Or must have same type.");
-                                        meta.set_type(new StaticType(StaticType.T.BOOL));
-                                } else {
-                                        meta.set_type(t);
+                                try {
+                                        t = types.get(0).or(types.get(1));
+                                        data.set_type(t);
+                                } catch (TypeError err) {
+                                        log_type_error(node.get_pos(), err.get_msg());
+                                        data.set_type(new StaticType(err));
                                 }
                                 break;
                                 
                         case LogicalAnd:
-                                t = types.get(0).and(types.get(1));
-                                if (t == null) {
-                                        log_type_error("And must have same type.");
-                                        meta.set_type(new StaticType(StaticType.T.BOOL));
-                                } else {
-                                        meta.set_type(t);
+                                try {
+                                        t = types.get(0).and(types.get(1));
+                                        data.set_type(t);
+                                } catch (TypeError err) {
+                                        log_type_error(node.get_pos(), err.get_msg());
+                                        data.set_type(new StaticType(err));
                                 }
                                 break;
                                 
                         case LogicalNot:
-                                t = types.get(0).not();
-                                if (t == null) {
-                                        log_type_error("Not must have same type.");
-                                        meta.set_type(new StaticType(StaticType.T.BOOL));
-                                } else {
-                                        meta.set_type(t);
+                                try {
+                                        t = types.get(0).not();
+                                        data.set_type(t);
+                                } catch (TypeError err) {
+                                        log_type_error(node.get_pos(), err.get_msg());
+                                        data.set_type(new StaticType(err));
                                 }
                                 break;
                                 
                         case Assignment:
-                                t = types.get(0).not();
-                                if (t == null) {
-                                        log_type_error("Not must have same type.");
-                                        meta.set_type(new StaticType(StaticType.T.BOOL));
-                                } else {
-                                        meta.set_type(t);
+                                try {
+                                        t = types.get(0).assign(types.get(1));
+                                        data.set_type(t);
+                                } catch (TypeError err) {
+                                        log_type_error(node.get_pos(), err.get_msg());
+                                        data.set_type(new StaticType(err));
                                 }
                                 break;
                                 
                         case AddressOf:
                                 s = resolve_symbol((Token) data.terminals().get(0));
                                 if (s == null)
-                                        meta.set_type(new StaticType(StaticType.T.VOID));
+                                        data.set_type(new StaticType(StaticType.T.VOID));
                                 else {
-                                        meta.set_type(s.get_type());
+                                        data.set_type(s.get_type());
                                 }
                                 break;
                                 
                         case Index:
                                 t = types.get(0).index(types.get(1));
                                 if (t == null) {
-                                        log_type_error("Index must be of type int.");
-                                        meta.set_type(new StaticType(StaticType.T.BOOL));
+                                        log_type_error(node.get_pos(), "Index must be of type int.");
+                                        data.set_type(new StaticType(StaticType.T.BOOL));
                                 }
                                 break;
                                 
                         case Dereference:
-                                meta.set_type(types.get(0));
+                                data.set_type(types.get(0));
                                 break;
                                 
                         case Call:
                                 s = resolve_symbol((Token) data.terminals().get(0));
                                 if (s == null)
-                                        meta.set_type(new StaticType(StaticType.T.VOID));
+                                        data.set_type(new StaticType(StaticType.T.VOID));
                                 else {
-                                        GeneralNode explist = node.get_child(0);
+                                        ASTNode explist = (ASTNode) node.get_child(0);
                                         List<StaticType> args = get_operand_type(explist);
-                                        t = s.get_type().call(new StaticType(args));
-                                        if (t == null)
-                                                log_type_error("Function signature incompatible.");
-                                        meta.set_type(s.get_type());
+                                        try {
+                                                s.get_type().call(new StaticType(args), s.name());
+                                                data.set_type(s.get_type());
+                                        } catch (TypeError err) {
+                                                log_type_error(node.get_pos(), err.get_msg());
+                                        }
                                 }
                                 break;
                                 
                         case Return:
-                                t = m_curr_func.get_type().ret(types.get(0));
-                                if (t == null) {
-                                        log_type_error("Return value doesn't match the return type.");
-                                        meta.set_type(m_curr_func.get_type());
-                                } else {
-                                        meta.set_type(types.get(0));
+                                try {
+                                        m_curr_func.get_type().ret(types.get(0), m_curr_func.name());
+                                        data.set_type(types.get(0));
+                                } catch (TypeError e) {
+                                        log_type_error(node.get_pos(), e.get_msg());
+                                        data.set_type(m_curr_func.get_type());
                                 }
                                 break;
                                 
                         case Addition:
-                                t = types.get(0).add(types.get(1));
-                                if (t == null) {
-                                        log_type_error("Add must have same type.");
-                                        meta.set_type(types.get(0));
-                                } else {
-                                        meta.set_type(t);
+                                try {
+                                        t = types.get(0).add(types.get(1));
+                                        data.set_type(t);
+                                } catch (TypeError err) {
+                                        log_type_error(node.get_pos(), err.get_msg());
+                                        data.set_type(new StaticType(err));
                                 }
                                 break;
                                 
                         case Subtraction:
                                 t = types.get(0).sub(types.get(1));
                                 if (t == null) {
-                                        log_type_error("Sub must have same type.");
-                                        meta.set_type(types.get(0));
+                                        log_type_error(node.get_pos(), "Sub must have same type.");
+                                        data.set_type(types.get(0));
                                 } else {
-                                        meta.set_type(t);
+                                        data.set_type(t);
                                 }
                                 break;
                                 
                         case Multiplication:
                                 t = types.get(0).mul(types.get(1));
                                 if (t == null) {
-                                        log_type_error("Mul must have same type.");
-                                        meta.set_type(types.get(0));
+                                        log_type_error(node.get_pos(), "Mul must have same type.");
+                                        data.set_type(types.get(0));
                                 } else {
-                                        meta.set_type(t);
+                                        data.set_type(t);
                                 }
                                 break;
                                 
                         case Division:
                                 t = types.get(0).div(types.get(1));
                                 if (t == null) {
-                                        log_type_error("Div must have same type.");
-                                        meta.set_type(types.get(0));
+                                        log_type_error(node.get_pos(), "Div must have same type.");
+                                        data.set_type(types.get(0));
                                 } else {
-                                        meta.set_type(t);
+                                        data.set_type(t);
                                 }
                                 break;
 		}
@@ -304,7 +326,10 @@ public class SemanticsAnalyzer implements ISemanticsAnalyzer {
 
         @Override
         public void analyze(AST tree) throws ErrorReport {
+                m_has_main = false;
                 check(tree.get_root());
+                if (!m_has_main)
+                        log_type_error(tree.get_root().get_pos(), "Doesn't have main.");
                 if (!m_errs.is_empty()) {
                         throw m_errs;
                 }
